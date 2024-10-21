@@ -1,3 +1,3 @@
 <div align="center">
-    # Monorepo for MarketSwipe
+    <h1>Monorepo for MarketSwipe</h1>
 </div>
