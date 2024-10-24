@@ -50,9 +50,13 @@
 > ```
 > source .venv/bin/activate
 > ``` 
-> 2. Run the startup command
+> 2. Run database migrations (Do this after every `git pull`)
 > ```
-> flask --app main run
+> flask db migrate
+> ```
+> 3. Run the startup command
+> ```
+> flask run
 > ```
 > 3. (Optional) Deactivate your virtual environment
 > ```
@@ -69,9 +73,13 @@
 > ```
 >  .venv\Scripts\activate
 > ``` 
-> 2. Run the startup command
+> 2. Run database migrations (Do this after every `git pull`)
 > ```
-> flask --app main run
+> flask db migrate
+> ```
+> 3. Run the startup command
+> ```
+> flask run
 > ```
 > 3. (Optional) Deactivate your virtual environment
 > ```
@@ -79,3 +87,6 @@
 > ```
 
 </details>  
+
+## Troubleshooting
+If you get an error when running attempting to run `flask run`, you are most likely missing dependencies. This could be because of a commit that added new dependencies after you installed them. Running `pip install -r requirements.txt` after sourcing your virtual environment should fix that.
