@@ -1,6 +1,7 @@
 from app import db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
+from argon2 import PasswordHasher
 
 
 class Users(db.Model):
@@ -14,6 +15,7 @@ class Users(db.Model):
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Users
+        exclude = ["password_hash"]
         include_fk = True
 
 
@@ -27,7 +29,9 @@ def register():
     if Users.query.filter_by(email=email).first():
         return jsonify({"message": "Email already in use"}), 409
     password = request.json["password"]
-    user = Users(email=email, password_hash=password)
+    hashed_password = PasswordHasher().hash(password)
+    user = Users(email=email, password_hash=hashed_password)
     db.session.add(user)
     db.session.commit()
     return jsonify(user_schema.dump(user))
+
