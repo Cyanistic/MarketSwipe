@@ -1,4 +1,4 @@
-from app import db
+from app import db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 
@@ -11,16 +11,23 @@ class Users(db.Model):
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
+class UserSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Users
+        include_fk = True
+
+
 auth_bp = Blueprint("auth", __name__, url_prefix=None)
+
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
+    user_schema = UserSchema()
     email = request.json["email"]
+    if Users.query.filter_by(email=email).first():
+        return jsonify({"message": "Email already in use"}), 409
     password = request.json["password"]
-    try:
-        user = Users(email=email, password_hash=password)
-        db.session.add(user)
-        db.session.commit()
-    except Exception as e:
-        print(f"Error {e}")
-    return jsonify({"message": "User created"})
+    user = Users(email=email, password_hash=password)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify(user_schema.dump(user))
