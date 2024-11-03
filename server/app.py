@@ -19,6 +19,7 @@ jwt = JWTManager(app)
 
 api = Blueprint('api', __name__, url_prefix='/api')
 from auth import auth_bp
+from products import products_bp
 api.register_blueprint(auth_bp)
 
 app.register_blueprint(api)

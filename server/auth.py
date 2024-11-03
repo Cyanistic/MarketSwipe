@@ -5,7 +5,7 @@ from argon2 import PasswordHasher
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 
-class Users(db.Model):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(120), nullable=False)
@@ -16,7 +16,7 @@ class Users(db.Model):
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = Users
+        model = User
         exclude = ["password_hash"]
         include_fk = True
 
@@ -29,11 +29,11 @@ def register():
     user_schema = UserSchema()
     email = request.json["email"]
 
-    if Users.query.filter_by(email=email).first():
+    if User.query.filter(User.email.collate(email)).first():
         return jsonify({"message": "Email already in use"}), 409
     password = request.json["password"]
     hashed_password = PasswordHasher().hash(password)
-    user = Users(email=email, password_hash=hashed_password)
+    user = User(email=email, password_hash=hashed_password)
     db.session.add(user)
     db.session.commit()
     return jsonify(dict(message="User successfully created")), 201
@@ -51,7 +51,7 @@ def login():
         user_schema = UserSchema()
         email = request.json["email"]
         password = request.json["password"]
-        if not (user := Users.query.filter_by(email=email).first()):
+        if not (user := User.query.filter_by(email=email).first()):
             return jsonify({"message": "Invalid email or password"}), 401
         if not PasswordHasher().verify(user.password_hash, password):
             return jsonify({"message": "Invalid email or password "}), 401
