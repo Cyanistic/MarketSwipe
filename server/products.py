@@ -40,4 +40,4 @@ class SwipeHistory(db.Model):
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
-products_bp = Blueprint("auth", __name__, url_prefix=None)
+products_bp = Blueprint("product", __name__, url_prefix=None)

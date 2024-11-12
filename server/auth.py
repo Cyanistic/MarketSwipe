@@ -1,7 +1,8 @@
-from app import db, ma
+from app import db, ma, jwt
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 from argon2 import PasswordHasher
+import sys
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 
@@ -55,5 +56,21 @@ def login():
             return jsonify({"message": "Invalid email or password"}), 401
         if not PasswordHasher().verify(user.password_hash, password):
             return jsonify({"message": "Invalid email or password "}), 401
-        token = create_access_token(identity=user_schema.dump(user))
+        token = create_access_token(identity=user)
         return jsonify(user_schema.dump(user)), 200, {"Authorization": f"Bearer {token}"}
+
+# Register a callback function that takes whatever object is passed in as the
+# identity when creating JWTs and converts it to a JSON serializable format.
+# @jwt.user_identity_loader
+# def user_identity_lookup(user):
+#     return user
+
+
+# Register a callback function that loads a user from your database whenever
+# a protected route is accessed. This should return any python object on a
+# successful lookup, or None if the lookup failed for any reason (for example
+# if the user has been deleted from the database).
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data["sub"]
+    return User.query.filter_by(id=identity["id"]).one_or_none()
