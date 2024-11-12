@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import os
 from typing import Any, Optional
 from flask import Blueprint, Flask, Request, jsonify, request
 from flask_marshmallow.schema import Schema
@@ -18,6 +19,8 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 app.config["JWT_SECRET_KEY"] = dotenv["JWT_SECRET_KEY"]
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=1)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
+app.config['UPLOAD_FOLDER'] = 'uploads'
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
@@ -86,16 +89,20 @@ def handle_validation_error(e):
     """
     return jsonify(e.messages), 400
 
+if app.config["UPLOAD_FOLDER"]:
+    os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
 api = Blueprint("api", __name__, url_prefix="/api")
 from auth import auth_bp
 from products import products_bp
 from orders import orders_bp
 from cart import cart_bp
+from upload import upload_bp
 
 api.register_blueprint(auth_bp)
 api.register_blueprint(products_bp)
 api.register_blueprint(orders_bp)
 api.register_blueprint(cart_bp)
+api.register_blueprint(upload_bp)
 
 app.register_blueprint(api)
