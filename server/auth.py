@@ -1,3 +1,5 @@
+from marshmallow import EXCLUDE, fields
+from marshmallow.exceptions import ValidationError
 from app import db, ma, jwt
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
@@ -21,18 +23,28 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
         exclude = ["password_hash"]
         include_fk = True
 
+def validate_password(password: str):
+    if len(password) < 8:
+        raise ValidationError("Password must be at least 8 characters long")
+    if not password.isascii():
+        raise ValidationError("Password must contain only ASCII characters")
+
+
+class CreateUserSchema(ma.Schema):
+    email = fields.Email(required=True)
+    password = fields.String(required=True, validate=validate_password)
+    class Meta:
+        unknown = EXCLUDE
 
 auth_bp = Blueprint("auth", __name__, url_prefix=None)
 
-
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    user_schema = UserSchema()
-    email = request.json["email"]
-
+    data = CreateUserSchema().load(request.get_json())
+    email = data["email"]
     if User.query.filter(User.email.collate(email)).first():
         return jsonify({"message": "Email already in use"}), 409
-    password = request.json["password"]
+    password = data["password"]
     hashed_password = PasswordHasher().hash(password)
     user = User(email=email, password_hash=hashed_password)
     db.session.add(user)

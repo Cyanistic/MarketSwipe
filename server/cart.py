@@ -1,6 +1,7 @@
 from flask_jwt_extended import current_user, jwt_required
 from flask_marshmallow.sqla import SQLAlchemyAutoSchema
-from app import db, ma
+from marshmallow import EXCLUDE, fields
+from app import CamelCaseSchema, db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 
@@ -30,6 +31,11 @@ class CartProductSchema(SQLAlchemyAutoSchema):
         include_relationships = True
         load_instance = True
 
+class ProductRequestSchema(CamelCaseSchema):
+    product_id = fields.Integer(required=True, strict=True)
+    quantity = fields.Integer(strict=True, load_default=1)
+    class Meta:
+        unknown = EXCLUDE
 
 @cart_bp.route("/", methods=["GET"])
 @jwt_required()
@@ -45,17 +51,15 @@ def get_cart():
 @cart_bp.route("/add", methods=["POST"])
 @jwt_required()
 def add_cart():
-    data = request.get_json()
-    product_id = data.get("productId")
-    if not product_id:
-        return {"message": "productId is required"}, 400
+    data = ProductRequestSchema().load(request.get_json())
+    product_id = data["product_id"]
     if not Product.query.get(product_id):
         return {"message": "Product not found"}, 404
     db.session.add(
         CartProduct(
             user_id=current_user.id,
-            product_id=data.get("productId"),
-            quantity=data.get("quantity", 1),
+            product_id=product_id,
+            quantity=data["quantity"],
         )
     )
     db.session.commit()
