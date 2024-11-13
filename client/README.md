@@ -56,7 +56,7 @@
 > 2. (Optional) Stop Local Host
 > ```
 > Ctrl + C
-> Input Y at Stop Batch Prompt
+> Type "Y" at Stop Batch Prompt
 > ```
 
 </details>
@@ -72,7 +72,7 @@
 > 2. (Optional) Stop Local Host
 > ```
 > Ctrl + C
-> Input Y at Stop Batch Prompt
+> Type "Y" at Stop Batch Prompt
 > ```
 
 </details>  
