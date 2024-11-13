@@ -78,4 +78,4 @@
 </details>  
 
 ## Troubleshooting
-If you get an error when attempting to run `npm run dev`, you are most likely missing dependencies. To resolve delete the `.vite\deps` folder under the `node_modules` folder, and run again the commands in steps 1-4 of the Initial Setup section.
+If you get an error when attempting to run `npm run dev`, you are most likely missing dependencies. To resolve delete the `.vite\deps` folder under the `node_modules` folder, and run again the commands in steps 1-3 of the Initial Setup section.
