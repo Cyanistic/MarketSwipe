@@ -2,6 +2,7 @@ from app import db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
+from auth import User
 
 products_bp = Blueprint("product", __name__, url_prefix='/products')
 

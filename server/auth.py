@@ -7,6 +7,7 @@ from argon2 import PasswordHasher
 import sys
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
+auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -15,7 +16,6 @@ class User(db.Model):
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
-
 
 class UserSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
@@ -35,8 +35,6 @@ class CreateUserSchema(ma.Schema):
     password = fields.String(required=True, validate=validate_password)
     class Meta:
         unknown = EXCLUDE
-
-auth_bp = Blueprint("auth", __name__, url_prefix=None)
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
