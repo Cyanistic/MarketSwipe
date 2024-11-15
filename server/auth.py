@@ -17,7 +17,7 @@ class User(db.Model):
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
-class UserSchema(ma.SQLAlchemyAutoSchema):
+class UserSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = User
         exclude = ["password_hash"]
@@ -50,6 +50,8 @@ def register():
     return jsonify(dict(message="User successfully created")), 201
 
 
+# Returns the AUTH token if the user is user is authenticated
+# Also returns the currently authenticated user's data
 @auth_bp.route("/login", methods=["GET", "POST"])
 @jwt_required(optional=True)
 def login():
