@@ -63,6 +63,14 @@ class CamelCaseSchema(Schema):
     def on_bind_field(self, field_name, field_obj):
         field_obj.data_key = camelcase(field_obj.data_key or field_name)
 
+class SQLAlchemyAutoCamelCaseSchema(ma.SQLAlchemyAutoSchema):
+    """Schema that uses camel-case for its external representation
+    and snake-case for its internal representation.
+    """
+
+    def on_bind_field(self, field_name, field_obj):
+        field_obj.data_key = camelcase(field_obj.data_key or field_name)
+
 
 @app.errorhandler(HTTPException)
 def handle_exception(e):
