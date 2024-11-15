@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from typing import Optional
-from flask import Blueprint, request
+from flask import Blueprint, request, send_from_directory
 from flask_jwt_extended import jwt_required
 from marshmallow import EXCLUDE, ValidationError, fields
 import sqlalchemy
@@ -116,3 +116,7 @@ def upload():
         db.session.rollback()
         upload = Upload.query.filter_by(path=path).first()
     return {"message": "Upload successful!", "upload": UploadSchema().dump(upload)}, 201
+
+@upload_bp.route("/<path:filename>", methods=["GET"])
+def get_upload(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)

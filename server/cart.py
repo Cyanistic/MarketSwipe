@@ -1,7 +1,7 @@
 from flask_jwt_extended import current_user, jwt_required
 from flask_marshmallow.sqla import SQLAlchemyAutoSchema
 from marshmallow import EXCLUDE, fields
-from app import CamelCaseSchema, db, ma
+from app import CamelCaseSchema, SQLAlchemyAutoCamelCaseSchema, db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 
@@ -25,7 +25,7 @@ class CartProduct(db.Model):
     )
 
 
-class CartProductSchema(SQLAlchemyAutoSchema):
+class CartProductSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = CartProduct
         include_relationships = True

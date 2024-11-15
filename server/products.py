@@ -1,4 +1,4 @@
-from app import db, ma
+from app import SQLAlchemyAutoCamelCaseSchema, db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
@@ -45,16 +45,16 @@ class SwipeHistory(db.Model):
     )
 
 # Schemas for serialization/deserialization
-class ProductSchema(ma.SQLAlchemyAutoSchema):
+class ProductSchema(SQLAlchemyAutoCamelCaseSchema):
     Category = ma.Nested('CategorySchema')
     class Meta:
         model = Product
 
-class CategorySchema(ma.SQLAlchemyAutoSchema):
+class CategorySchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = Category
 
-class TagSchema(ma.SQLAlchemyAutoSchema):
+class TagSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = Tag
 
