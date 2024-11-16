@@ -1,6 +1,6 @@
 from marshmallow import EXCLUDE, fields
 from marshmallow.exceptions import ValidationError
-from app import db, ma, jwt
+from app import SQLAlchemyAutoCamelCaseSchema, db, ma, jwt
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 from argon2 import PasswordHasher
@@ -8,6 +8,7 @@ import sys
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -17,11 +18,13 @@ class User(db.Model):
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
+
 class UserSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = User
         exclude = ["password_hash"]
         include_fk = True
+
 
 def validate_password(password: str):
     if len(password) < 8:
@@ -33,8 +36,10 @@ def validate_password(password: str):
 class CreateUserSchema(ma.Schema):
     email = fields.Email(required=True)
     password = fields.String(required=True, validate=validate_password)
+
     class Meta:
         unknown = EXCLUDE
+
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
@@ -71,6 +76,7 @@ def login():
         dump_user = user_schema.dump(user)
         token = create_access_token(identity=dump_user)
         return jsonify(dump_user), 200, {"Authorization": f"Bearer {token}"}
+
 
 # Register a callback function that takes whatever object is passed in as the
 # identity when creating JWTs and converts it to a JSON serializable format.

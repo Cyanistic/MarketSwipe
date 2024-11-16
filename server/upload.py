@@ -24,6 +24,7 @@ class Upload(db.Model):
 
 
 class ProductUpload(db.Model):
+    from products import Product
     upload_id = db.Column(db.Integer, db.ForeignKey("upload.id"), primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey("product.id"), primary_key=True)
     upload = db.relationship("Upload", backref="product_upload")
@@ -49,7 +50,7 @@ class UploadSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = Upload
         load_instance = True
-        unknow = EXCLUDE
+        unknown = EXCLUDE
 
 
 # Validates the base64 encoded file data and returns the decoded bytes
@@ -60,12 +61,12 @@ def validate_file_data(file_data: str) -> tuple[bytes, Optional[str]]:
         head, *raw_data = file_data.split(",")
         # If the raw data is empty, then the data has no encoding information
         if not raw_data:
-                return base64.b64decode(file_data), None
+            return base64.b64decode(file_data), None
         # If the raw data is not empty, then the data has encoding information
         # Split the encoding information from the MIME type
         # head = "data:MIME_TYPE"
         # tail = "base64"
-        head, tail = head.split(";");
+        head, tail = head.split(";")
         if not tail or not head:
             raise ValidationError("Invalid base64 data")
 
@@ -73,8 +74,6 @@ def validate_file_data(file_data: str) -> tuple[bytes, Optional[str]]:
         return base64.b64decode(raw_data[0]), mime
     except Exception:
         raise ValidationError("Invalid base64 data")
-
-
 
 
 # Product images are uploaded through this endpoint
@@ -116,6 +115,7 @@ def upload():
         db.session.rollback()
         upload = Upload.query.filter_by(path=path).first()
     return {"message": "Upload successful!", "upload": UploadSchema().dump(upload)}, 201
+
 
 @upload_bp.route("/<path:filename>", methods=["GET"])
 def get_upload(filename):
