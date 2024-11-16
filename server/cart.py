@@ -31,17 +31,20 @@ class CartProductSchema(SQLAlchemyAutoCamelCaseSchema):
         include_relationships = True
         load_instance = True
 
+
 class ProductRequestSchema(CamelCaseSchema):
     product_id = fields.Integer(required=True, strict=True)
     quantity = fields.Integer(strict=True, load_default=1)
+
     class Meta:
         unknown = EXCLUDE
+
 
 @cart_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_cart():
     cart = (
-        CartProduct.query.join(Product)
+        CartProduct.query.join(Product, CartProduct.product_id == Product.id)
         .filter(CartProduct.user_id == current_user.id)
         .all()
     )
