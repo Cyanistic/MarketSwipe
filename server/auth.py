@@ -27,6 +27,9 @@ class UserSchema(SQLAlchemyAutoCamelCaseSchema):
 
 
 def validate_password(password: str):
+    """
+    Validates the password to ensure it meets the required criteria.
+    """
     if len(password) < 8:
         raise ValidationError("Password must be at least 8 characters long")
     if not password.isascii():
@@ -34,6 +37,9 @@ def validate_password(password: str):
 
 
 class CreateUserSchema(ma.Schema):
+    """
+    Schema for creating a new user.
+    """
     email = fields.Email(required=True)
     password = fields.String(required=True, validate=validate_password)
 
@@ -43,6 +49,9 @@ class CreateUserSchema(ma.Schema):
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
+    """
+    Registers a new user.
+    """
     data = CreateUserSchema().load(request.get_json())
     email = data["email"]
     if User.query.filter(User.email.collate(email)).first():
@@ -56,10 +65,13 @@ def register():
 
 
 # Returns the AUTH token if the user is user is authenticated
-# Also returns the currently authenticated user's data
 @auth_bp.route("/login", methods=["GET", "POST"])
 @jwt_required(optional=True)
 def login():
+    """
+    Authenticates a user and returns a JWT token in the response header.
+    Sending a GET request returns the currently authenticated user's data.
+    """
     if request.method == "GET":
         if user := get_jwt_identity():
             return jsonify(user), 200
