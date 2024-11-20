@@ -58,13 +58,18 @@ def add_cart():
     product_id = data["product_id"]
     if not Product.query.get(product_id):
         return {"message": "Product not found"}, 404
-    db.session.add(
-        CartProduct(
+    cart_product = CartProduct.query.filter_by(
+        user_id=current_user.id, product_id=product_id
+    ).first()
+    if cart_product:
+        cart_product.quantity += data["quantity"]
+    else:
+        cart_product = CartProduct(
             user_id=current_user.id,
             product_id=product_id,
             quantity=data["quantity"],
         )
-    )
+        db.session.add(cart_product)
     db.session.commit()
     return {"message": "Product successfully added to cart"}, 200
 

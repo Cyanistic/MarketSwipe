@@ -1,4 +1,4 @@
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, current_user
 from marshmallow import EXCLUDE, fields
 from app import CamelCaseSchema, SQLAlchemyAutoCamelCaseSchema, db, ma
 from datetime import datetime, timezone
@@ -100,7 +100,7 @@ class CreateProductSchema(CamelCaseSchema):
 def create_product():
     data = CreateProductSchema().load(request.get_json())
     new_product = Product(
-        name=data["name"], price=data["price"], category_id=data["category_id"]
+        name=data["name"], price=data["price"], category_id=data["category_id"], seller_id=current_user.id
     )
     db.session.add(new_product)
     db.session.commit()
