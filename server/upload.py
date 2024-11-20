@@ -15,6 +15,9 @@ upload_bp = Blueprint("upload", __name__, url_prefix="/upload")
 
 
 class Upload(db.Model):
+    """
+    Model representing an uploaded file.
+    """
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     path = db.Column(db.String(120), nullable=False, unique=True)
     mime = db.Column(db.String(120), nullable=False)
@@ -24,6 +27,9 @@ class Upload(db.Model):
 
 
 class ProductUpload(db.Model):
+    """
+    Model representing the association between a product and an uploaded file.
+    """
     from products import Product
     upload_id = db.Column(db.Integer, db.ForeignKey("upload.id"), primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey("product.id"), primary_key=True)
@@ -81,6 +87,9 @@ def validate_file_data(file_data: str) -> tuple[bytes, Optional[str]]:
 @upload_bp.route("/", methods=["POST"])
 @jwt_required()
 def upload():
+    """
+    Endpoint for uploading a file.
+    """
     data = UploadRequestSchema().load(request.get_json())
     # Decode and validate the base64 encoded file data
     file_data, mime = validate_file_data(data["file_data"])
@@ -94,7 +103,8 @@ def upload():
         mime = "application/octet-stream"
 
     # Save the file with the correct extension if possible
-    ext = filetype.get_type(mime=mime).extension
+    kind = filetype.guess(file_data)
+    ext = kind.extension if kind else None
     path = ""
     if not ext or mime == "application/octet-stream":
         path = hash
@@ -105,6 +115,7 @@ def upload():
     upload = Upload(path=path, mime=mime)
     try:
         db.session.add(upload)
+        os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"]), exist_ok=True)
         file = open(os.path.join(app.config["UPLOAD_FOLDER"], path), "wb")
         file.write(file_data)
         db.session.commit()
@@ -119,4 +130,7 @@ def upload():
 
 @upload_bp.route("/<path:filename>", methods=["GET"])
 def get_upload(filename):
+    """
+    Endpoint for retrieving an uploaded file.
+    """
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)

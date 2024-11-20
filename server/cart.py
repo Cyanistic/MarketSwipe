@@ -11,6 +11,9 @@ cart_bp = Blueprint("cart", __name__, url_prefix="/cart")
 
 
 class CartProduct(db.Model):
+    """
+    Model representing a product in the user's cart.
+    """
     user_id = db.Column(
         db.Integer, db.ForeignKey("user.id"), primary_key=True, nullable=False
     )
@@ -33,6 +36,9 @@ class CartProductSchema(SQLAlchemyAutoCamelCaseSchema):
 
 
 class ProductRequestSchema(CamelCaseSchema):
+    """
+    Schema for validating product request data.
+    """
     product_id = fields.Integer(required=True, strict=True)
     quantity = fields.Integer(strict=True, load_default=1)
 
@@ -43,6 +49,9 @@ class ProductRequestSchema(CamelCaseSchema):
 @cart_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_cart():
+    """
+    Retrieves the current user's cart.
+    """
     cart = (
         CartProduct.query.join(Product, CartProduct.product_id == Product.id)
         .filter(CartProduct.user_id == current_user.id)
@@ -54,6 +63,9 @@ def get_cart():
 @cart_bp.route("/add", methods=["POST"])
 @jwt_required()
 def add_cart():
+    """
+    Adds a product to the user's cart.
+    """
     data = ProductRequestSchema().load(request.get_json())
     product_id = data["product_id"]
     if not Product.query.get(product_id):
@@ -77,6 +89,9 @@ def add_cart():
 @cart_bp.route("/remove", methods=["POST"])
 @jwt_required()
 def remove_cart():
+    """
+    Removes a product from the user's cart.
+    """
     data = request.get_json()
     product_id = data.get("productId")
     if not product_id:
