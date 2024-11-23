@@ -1,7 +1,11 @@
 alembic==1.13.3
 argon2==0.1.10
+argon2-cffi==23.1.0
 filetype==1.2.0
 Flask==3.1.0
+# Have to include PyJWT==2.9.0 because of a bug in the newest version that prevents JWT from working
+# https://github.com/vimalloc/flask-jwt-extended/issues/557#issuecomment-2483530464
+PyJWT==2.9.0
 Flask_JWT_Extended==4.6.0
 flask_marshmallow==1.2.1
 Flask_Migrate==4.0.7
