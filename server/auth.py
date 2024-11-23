@@ -92,9 +92,9 @@ def login():
 
 # Register a callback function that takes whatever object is passed in as the
 # identity when creating JWTs and converts it to a JSON serializable format.
-@jwt.user_identity_loader
-def user_identity_lookup(user):
-    return user
+# @jwt.user_identity_loader
+# def user_identity_lookup(user):
+#     return user
 
 
 # Register a callback function that loads a user from your database whenever

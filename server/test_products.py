@@ -36,6 +36,7 @@ def test_create_product(test_client, access_token):
         json={"name": "Laptop", "price": 999.99, "categoryId": category.id},
         headers={"Authorization": f"Bearer {access_token}"},
     )
+
     assert response.status_code == 201
     assert response.json["message"] == "Product created successfully"
     assert response.json["product"]["name"] == "Laptop"
