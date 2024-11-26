@@ -19,12 +19,12 @@ app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 app.config["JWT_SECRET_KEY"] = dotenv["JWT_SECRET_KEY"]
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=1)
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
-app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config["MAX_CONTENT_LENGTH"] = 16 * 1000 * 1000
+app.config["UPLOAD_FOLDER"] = "uploads"
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, render_as_batch=True)
 jwt = JWTManager(app)
 
 
@@ -64,6 +64,15 @@ class CamelCaseSchema(Schema):
         field_obj.data_key = camelcase(field_obj.data_key or field_name)
 
 
+class SQLAlchemyAutoCamelCaseSchema(ma.SQLAlchemyAutoSchema):
+    """Schema that uses camel-case for its external representation
+    and snake-case for its internal representation.
+    """
+
+    def on_bind_field(self, field_name, field_obj):
+        field_obj.data_key = camelcase(field_obj.data_key or field_name)
+
+
 @app.errorhandler(HTTPException)
 def handle_exception(e):
     """Return JSON instead of HTML for HTTP errors."""
@@ -88,6 +97,7 @@ def handle_validation_error(e):
         In other words, when the client sends invalid JSON data.
     """
     return jsonify(e.messages), 400
+
 
 if app.config["UPLOAD_FOLDER"]:
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)

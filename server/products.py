@@ -1,10 +1,13 @@
-from app import db, ma
+from flask_jwt_extended import jwt_required, current_user
+from marshmallow import EXCLUDE, fields
+from app import CamelCaseSchema, SQLAlchemyAutoCamelCaseSchema, db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
 from auth import User
 
-products_bp = Blueprint("product", __name__, url_prefix='/products')
+products_bp = Blueprint("product", __name__, url_prefix="/products")
+
 
 class Tag(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -12,6 +15,7 @@ class Tag(db.Model):
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
+
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
@@ -21,11 +25,14 @@ class Category(db.Model):
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
     price = db.Column(db.Float, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
+    seller_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    seller = db.relationship("User", backref="user")
     category = db.relationship("Category", backref="category")
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
@@ -34,29 +41,39 @@ class Product(db.Model):
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
+
 class SwipeHistory(db.Model):
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey("product.id"), nullable=False, primary_key=True)
-    user = db.relationship("User", backref="user")
-    product = db.relationship("Product", backref="product")
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id"), nullable=False, primary_key=True
+    )
+    product_id = db.Column(
+        db.Integer, db.ForeignKey("product.id"), nullable=False, primary_key=True
+    )
+    user = db.relationship("User", backref="swipe_history")
+    product = db.relationship("Product", backref="swipe_history")
     liked = db.Column(db.Boolean, nullable=False)
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
+
 # Schemas for serialization/deserialization
-class ProductSchema(ma.SQLAlchemyAutoSchema):
-    Category = ma.Nested('CategorySchema')
+class ProductSchema(SQLAlchemyAutoCamelCaseSchema):
+    Category = ma.Nested("CategorySchema")
+
     class Meta:
         model = Product
 
-class CategorySchema(ma.SQLAlchemyAutoSchema):
+
+class CategorySchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = Category
 
-class TagSchema(ma.SQLAlchemyAutoSchema):
+
+class TagSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = Tag
+
 
 product_schema = ProductSchema()
 products_schema = ProductSchema(many=True)
@@ -67,89 +84,150 @@ tags_schema = TagSchema(many=True)
 
 # Product CRUD Endpoints
 
+
+class CreateProductSchema(CamelCaseSchema):
+    name = fields.String(required=True)
+    price = fields.Float(required=True)
+    category_id = fields.Integer(required=True)
+
+    class Meta:
+        unknown = EXCLUDE
+
+
 # CREATE Product
-@products_bp.route('/', methods=['POST'])
+@products_bp.route("/", methods=["POST"])
+@jwt_required()
 def create_product():
-    data = request.get_json()
+    data = CreateProductSchema().load(request.get_json())
     new_product = Product(
-        name=data['name'],
-        price=data['price'],
-        category_id=data['category_id']
+        name=data["name"], price=data["price"], category_id=data["category_id"], seller_id=current_user.id
     )
     db.session.add(new_product)
     db.session.commit()
-    return jsonify({"message": "Product created successfully", "product": product_schema.dump(new_product)}), 201
+    return (
+        jsonify(
+            {
+                "message": "Product created successfully",
+                "product": product_schema.dump(new_product),
+            }
+        ),
+        201,
+    )
+
 
 # READ all Products
-@products_bp.route('/', methods=['GET'])
+@products_bp.route("/", methods=["GET"])
 def get_products():
     products = Product.query.all()
     return jsonify(products_schema.dump(products)), 200
 
+
 # READ single Product by ID
-@products_bp.route('/<int:id>', methods=['GET'])
+@products_bp.route("/<int:id>", methods=["GET"])
 def get_product(id):
     product = Product.query.get_or_404(id)
     return jsonify(product_schema.dump(product)), 200
 
+
+# Get all uploads associated with a product
+@products_bp.route("/<int:id>/uploads", methods=["GET"])
+def get_product_uploads(id):
+    from upload import ProductUpload, Upload, UploadSchema
+    product_uploads_schema = UploadSchema(many=True)
+    product_uploads = (
+        Upload.query.join(ProductUpload, ProductUpload.upload_id == Upload.id)
+        .filter_by(product_id=id)
+        .all()
+    )
+    return jsonify(product_uploads_schema.dump(product_uploads)), 200
+
+
 # UPDATE Product
-@products_bp.route('/<int:id>', methods=['PUT'])
+@products_bp.route("/<int:id>", methods=["PUT"])
 def update_product(id):
     data = request.get_json()
     product = Product.query.get_or_404(id)
-    product.name = data.get('name', product.name)
-    product.price = data.get('price', product.price)
-    product.category_id = data.get('category_id', product.category_id)
+    product.name = data.get("name", product.name)
+    product.price = data.get("price", product.price)
+    product.category_id = data.get("category_id", product.category_id)
     db.session.commit()
-    return jsonify({"message": "Product updated successfully", "product": product_schema.dump(product)}), 200
+    return (
+        jsonify(
+            {
+                "message": "Product updated successfully",
+                "product": product_schema.dump(product),
+            }
+        ),
+        200,
+    )
+
 
 # DELETE Product
-@products_bp.route('/<int:id>', methods=['DELETE'])
+@products_bp.route("/<int:id>", methods=["DELETE"])
 def delete_product(id):
     product = Product.query.get_or_404(id)
     db.session.delete(product)
     db.session.commit()
     return jsonify({"message": "Product deleted successfully"}), 200
 
+
 # Category CRUD Endpoints
 
+
 # CREATE Category
-@products_bp.route('/categories', methods=['POST'])
+@products_bp.route("/categories", methods=["POST"])
 def create_category():
     data = request.get_json()
-    new_category = Category(name=data['name'], description=data.get('description'))
+    new_category = Category(name=data["name"], description=data.get("description"))
     db.session.add(new_category)
     db.session.commit()
-    return jsonify({"message": "Category created successfully", "category": category_schema.dump(new_category)}), 201
+    return (
+        jsonify(
+            {
+                "message": "Category created successfully",
+                "category": category_schema.dump(new_category),
+            }
+        ),
+        201,
+    )
+
 
 # READ all Categories
-@products_bp.route('/categories', methods=['GET'])
+@products_bp.route("/categories", methods=["GET"])
 def get_categories():
     categories = Category.query.all()
     return jsonify(categories_schema.dump(categories)), 200
 
+
 # DELETE Category
-@products_bp.route('/categories/<int:id>', methods=['DELETE'])
+@products_bp.route("/categories/<int:id>", methods=["DELETE"])
 def delete_category(id):
     category = Category.query.get_or_404(id)
     db.session.delete(category)
     db.session.commit()
     return jsonify({"message": "Category deleted successfully"}), 200
 
+
 # Tag CRUD Endpoints
 
+
 # CREATE Tag
-@products_bp.route('/tags', methods=['POST'])
+@products_bp.route("/tags", methods=["POST"])
 def create_tag():
     data = request.get_json()
-    new_tag = Tag(name=data['name'])
+    new_tag = Tag(name=data["name"])
     db.session.add(new_tag)
     db.session.commit()
-    return jsonify({"message": "Tag created successfully", "tag": tag_schema.dump(new_tag)}), 201
+    return (
+        jsonify(
+            {"message": "Tag created successfully", "tag": tag_schema.dump(new_tag)}
+        ),
+        201,
+    )
+
 
 # READ all Tags
-@products_bp.route('/tags', methods=['GET'])
+@products_bp.route("/tags", methods=["GET"])
 def get_tags():
     tags = Tag.query.all()
     return jsonify(tags_schema.dump(tags)), 200
-
