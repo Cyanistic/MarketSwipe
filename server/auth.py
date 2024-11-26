@@ -1,11 +1,13 @@
 from marshmallow import EXCLUDE, fields
 from marshmallow.exceptions import ValidationError
-from app import db, ma, jwt
+from app import SQLAlchemyAutoCamelCaseSchema, db, ma, jwt
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 from argon2 import PasswordHasher
 import sys
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+
+auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 class User(db.Model):
@@ -17,13 +19,17 @@ class User(db.Model):
     )
 
 
-class UserSchema(ma.SQLAlchemyAutoSchema):
+class UserSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = User
         exclude = ["password_hash"]
         include_fk = True
 
+
 def validate_password(password: str):
+    """
+    Validates the password to ensure it meets the required criteria.
+    """
     if len(password) < 8:
         raise ValidationError("Password must be at least 8 characters long")
     if not password.isascii():
@@ -31,15 +37,21 @@ def validate_password(password: str):
 
 
 class CreateUserSchema(ma.Schema):
+    """
+    Schema for creating a new user.
+    """
     email = fields.Email(required=True)
     password = fields.String(required=True, validate=validate_password)
+
     class Meta:
         unknown = EXCLUDE
 
-auth_bp = Blueprint("auth", __name__, url_prefix=None)
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
+    """
+    Registers a new user.
+    """
     data = CreateUserSchema().load(request.get_json())
     email = data["email"]
     if User.query.filter(User.email.collate(email)).first():
@@ -52,9 +64,14 @@ def register():
     return jsonify(dict(message="User successfully created")), 201
 
 
+# Returns the AUTH token if the user is user is authenticated
 @auth_bp.route("/login", methods=["GET", "POST"])
 @jwt_required(optional=True)
 def login():
+    """
+    Authenticates a user and returns a JWT token in the response header.
+    Sending a GET request returns the currently authenticated user's data.
+    """
     if request.method == "GET":
         if user := get_jwt_identity():
             return jsonify(user), 200
@@ -68,8 +85,10 @@ def login():
             return jsonify({"message": "Invalid email or password"}), 401
         if not PasswordHasher().verify(user.password_hash, password):
             return jsonify({"message": "Invalid email or password "}), 401
-        token = create_access_token(identity=user)
-        return jsonify(user_schema.dump(user)), 200, {"Authorization": f"Bearer {token}"}
+        dump_user = user_schema.dump(user)
+        token = create_access_token(identity=dump_user)
+        return jsonify(dump_user), 200, {"Authorization": f"Bearer {token}"}
+
 
 # Register a callback function that takes whatever object is passed in as the
 # identity when creating JWTs and converts it to a JSON serializable format.

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
-import LoginPage from './LoginPage';
+import LoginPage from './LoginPage.jsx';
 
 const App = () => {
   const navigate = useNavigate();

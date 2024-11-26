@@ -1,7 +1,7 @@
 from flask_jwt_extended import current_user, jwt_required
 from flask_marshmallow.sqla import SQLAlchemyAutoSchema
 from marshmallow import EXCLUDE, fields
-from app import CamelCaseSchema, db, ma
+from app import CamelCaseSchema, SQLAlchemyAutoCamelCaseSchema, db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 
@@ -11,6 +11,9 @@ cart_bp = Blueprint("cart", __name__, url_prefix="/cart")
 
 
 class CartProduct(db.Model):
+    """
+    Model representing a product in the user's cart.
+    """
     user_id = db.Column(
         db.Integer, db.ForeignKey("user.id"), primary_key=True, nullable=False
     )
@@ -25,23 +28,32 @@ class CartProduct(db.Model):
     )
 
 
-class CartProductSchema(SQLAlchemyAutoSchema):
+class CartProductSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = CartProduct
         include_relationships = True
         load_instance = True
 
+
 class ProductRequestSchema(CamelCaseSchema):
+    """
+    Schema for validating product request data.
+    """
     product_id = fields.Integer(required=True, strict=True)
     quantity = fields.Integer(strict=True, load_default=1)
+
     class Meta:
         unknown = EXCLUDE
+
 
 @cart_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_cart():
+    """
+    Retrieves the current user's cart.
+    """
     cart = (
-        CartProduct.query.join(Product)
+        CartProduct.query.join(Product, CartProduct.product_id == Product.id)
         .filter(CartProduct.user_id == current_user.id)
         .all()
     )
@@ -51,17 +63,25 @@ def get_cart():
 @cart_bp.route("/add", methods=["POST"])
 @jwt_required()
 def add_cart():
+    """
+    Adds a product to the user's cart.
+    """
     data = ProductRequestSchema().load(request.get_json())
     product_id = data["product_id"]
     if not Product.query.get(product_id):
         return {"message": "Product not found"}, 404
-    db.session.add(
-        CartProduct(
+    cart_product = CartProduct.query.filter_by(
+        user_id=current_user.id, product_id=product_id
+    ).first()
+    if cart_product:
+        cart_product.quantity += data["quantity"]
+    else:
+        cart_product = CartProduct(
             user_id=current_user.id,
             product_id=product_id,
             quantity=data["quantity"],
         )
-    )
+        db.session.add(cart_product)
     db.session.commit()
     return {"message": "Product successfully added to cart"}, 200
 
@@ -69,6 +89,9 @@ def add_cart():
 @cart_bp.route("/remove", methods=["POST"])
 @jwt_required()
 def remove_cart():
+    """
+    Removes a product from the user's cart.
+    """
     data = request.get_json()
     product_id = data.get("productId")
     if not product_id:
