@@ -1,6 +1,78 @@
-#root {
+
+.App {
   max-width: 1280px;
+  min-height: 88.2vh;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center horizontally */
+  justify-content: center; /* Center vertically */
+  background: linear-gradient(to bottom left, rgba(173, 216, 230, 0.8), rgba(245, 222, 179, 0.8) 75%);
+}
+
+.fullPage {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+
+/* Header Styling */
+.header {
+  margin-bottom: 1rem;
+}
+
+.mainHeader{
+  font-size: 3.5rem;
+  color: #2c3e50;
+  font-family: 'Poppins', sans-serif;
+  margin: 0.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.mainHeader span {
+  color: coral;
+  font-style: italic;
+  text-decoration: underline;
+}
+
+.slogan {
+  font-size: 1.5rem;
+  color: #555;
+  margin: 0.5rem 0;
+  font-style: italic;
+}
+
+.description {
+  margin: 1rem 0 2rem;
+  padding: 0 1rem;
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: #666;
+}
+
+
+.centerButton {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.centerButton:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+.centerButton:active {
+  background-color: #003f8a;
+  transform: scale(0.98);
 }
