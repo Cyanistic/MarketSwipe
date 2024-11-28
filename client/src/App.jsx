@@ -3,10 +3,19 @@ import React from 'react';
 import { useRoutes, Link } from 'react-router-dom';
 import Login from './pages/Login';
 import CreateUser from './pages/CreateUser';
+import Shopping from './pages/Shopping';
 
 const App = () => {
   // Sets up routes
   let element = useRoutes([
+    {
+      path: "/shopping",
+      element: (
+        <div className="fullPage">
+          <Shopping />
+        </div>
+      ),
+    },
     {
       path: "/login",
       element: (
