@@ -62,7 +62,7 @@ def get_cart():
 
 @cart_bp.route("/add", methods=["POST"])
 @jwt_required()
-def add_cart():
+def add_cart_product():
     """
     Adds a product to the user's cart.
     """
@@ -88,7 +88,7 @@ def add_cart():
 
 @cart_bp.route("/remove", methods=["POST"])
 @jwt_required()
-def remove_cart():
+def remove_cart_product():
     """
     Removes a product from the user's cart.
     """
