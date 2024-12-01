@@ -60,3 +60,9 @@
     flex-direction: column;
     align-items: center; 
 }
+
+.icon {
+    margin-right: 10px;
+    font-size: 1.5rem;
+    color: #888;
+  }
