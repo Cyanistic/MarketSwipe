@@ -1,8 +1,8 @@
-import './Login.css';
+import './LoginPage.css';
 import React, { useState } from 'react';
 import AuthForm from '../components/AuthForm';
 
-const Login = () => {
+const LoginPage = () => {
 
   return (
     <div className='login-page'>
@@ -12,5 +12,5 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default LoginPage;
 

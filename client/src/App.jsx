@@ -1,7 +1,7 @@
 import './App.css';
 import React from 'react';
 import { useRoutes, Link } from 'react-router-dom';
-import Login from './pages/Login';
+import LoginPage from './pages/LoginPage';
 import CreateUser from './pages/CreateUser';
 import Shopping from './pages/Shopping';
 
@@ -20,7 +20,7 @@ const App = () => {
       path: "/login",
       element: (
         <div className="fullPage">
-          <Login />
+          <LoginPage />
         </div>
       ),
     },
