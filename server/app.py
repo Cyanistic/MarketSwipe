@@ -108,11 +108,13 @@ from products import products_bp
 from orders import orders_bp
 from cart import cart_bp
 from upload import upload_bp
+from support import support_bp
 
 api.register_blueprint(auth_bp)
 api.register_blueprint(products_bp)
 api.register_blueprint(orders_bp)
 api.register_blueprint(cart_bp)
 api.register_blueprint(upload_bp)
+api.register_blueprint(support_bp)
 
 app.register_blueprint(api)
