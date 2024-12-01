@@ -1,13 +1,13 @@
-import { useState } from 'react'
-import './App.css'
+import './App.css';
+import LoginPage from './LoginPage';
 
 const App = () => {
   return (
     <div>
-      <h1>Market Swipe</h1>
-      <h2>Display Product</h2>
+      <LoginPage />
     </div>
-  )
-}
+  );
+};
 
-export default App
+
+export default App;
