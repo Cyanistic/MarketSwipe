@@ -1,107 +1,153 @@
-import React, { useState } from 'react';
 
 const LoginPage = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault(); // Prevents the default form submission
-    console.log('Username:', username);
-    console.log('Password:', password);
-    // Add your authentication logic here
-    alert(`Welcome, ${username}!`);
+    return (
+      <div style={styles.container}>
+        {/* Title */}
+        <div style={styles.titleContainer}>
+          <h1 style={styles.text}>MARKET</h1>
+          <h1 style={styles.text}>SWIPE</h1>
+        </div>
+  
+        {/* Image Box */}
+        <div style={styles.box}>
+          <img
+            src="/./components/StartLogo.png" 
+            alt="Cart with arrows"
+            style={styles.image}
+          />
+        </div>
+  
+        {/* Form */}
+        <div style={styles.formSection}>
+          <h3 style={styles.signInText}>SIGN IN</h3>
+          <div style={styles.formContainer}>
+            {/* Username Input */}
+            <div style={styles.inputGroup}>
+              <span style={styles.icon}>👤</span>
+              <input
+                type="text"
+                placeholder="Username"
+                style={styles.input}
+              />
+            </div>
+  
+            {/* Password Input */}
+            <div style={styles.inputGroup}>
+              <span style={styles.icon}>🔒</span>
+              <input
+                type="password"
+                placeholder="Password"
+                style={styles.input}
+              />
+            </div>
+  
+            {/* Buttons */}
+            <button style={styles.loginButton}>LOG IN</button>
+            <button style={styles.signUpButton}>SIGN UP</button>
+          </div>
+        </div>
+      </div>
+    );
   };
-
-  return (
-    <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Account Login</h1>
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: 'inline-block',
-          padding: '80px',
-          border: '1px solid #ccc',
-          borderRadius: '5px',
-          backgroundColor: '#f9f9f9',
-          boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-        }}
-      >
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="username" style={{ display: 'block', marginBottom: '5px', marginRight: '113px', fontWeight: 'bold' }}>
-            Username
-          </label>
-          <input
-            id="username"
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            style={{
-              padding: '10px',
-              width: '100%',
-              border: '1px solid #ccc',
-              borderRadius: '5px',
-            }}
-            placeholder="Enter your username"
-            required
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="password" style={{ display: 'block', marginBottom: '5px', marginRight: '113px', fontWeight: 'bold' }}>
-            Password
-          </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            style={{
-              padding: '10px',
-              width: '100%',
-              border: '1px solid #ccc',
-              borderRadius: '5px',
-            }}
-            placeholder="Enter your password"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          style={{
-            padding: '10px 20px',
-            marginTop: '30px',
-            backgroundColor: '#007BFF',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
-          Login
-        </button>
-
-        <button
-          type="submit"
-          style={{
-            padding: '10px 20px',
-            marginTop: '30px',
-            marginLeft: '50px',
-            backgroundColor: '#8f8f8f',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
-          Return
-        </button>
-      </form>
-      <p style={{ marginTop: '15px' }}>
-        Don't have an account? <a href="/signup" style={{ color: '#007BFF', textDecoration: 'none' }}>Sign Up</a>
-      </p>
-    </div>
-  );
-};
-
-export default LoginPage;
+  
+  const styles = {
+    container: {
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      height: '100vh',
+      backgroundColor: '#FFD8A9',
+      textAlign: 'center',
+    },
+    titleContainer: {
+      marginBottom: '20px',
+    },
+    text: {
+      color: '#39B647',
+      fontSize: '7rem',
+      fontWeight: 'bold',
+      fontFamily: "'Poppins', sans-serif",
+      margin: 0,
+    },
+    box: {
+      width: '373px',
+      height: '256px',
+      backgroundColor: '#FFF',
+      borderRadius: '10px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+      marginBottom: '30px',
+    },
+    image: {
+      maxWidth: '130%',
+      maxHeight: '130%',
+      marginLeft: '125px',
+      marginTop: '125px',
+    },
+    formSection: {
+      width: '100%',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+    },
+    signInText: {
+      color: '#888',
+      fontSize: '1.5rem',
+      fontWeight: 'bold',
+      fontFamily: "'Poppins', sans-serif",
+      marginBottom: '20px',
+    },
+    formContainer: {
+      width: '300px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '15px',
+    },
+    inputGroup: {
+      display: 'flex',
+      alignItems: 'center',
+      backgroundColor: '#FFF',
+      borderRadius: '10px',
+      padding: '10px',
+      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+    },
+    icon: {
+      marginRight: '10px',
+      fontSize: '1.5rem',
+      color: '#888',
+    },
+    input: {
+      border: 'none',
+      outline: 'none',
+      flex: 1,
+      fontSize: '1rem',
+      fontFamily: "'Poppins', sans-serif",
+      padding: '5px',
+    },
+    loginButton: {
+      backgroundColor: '#444',
+      color: '#FFF',
+      fontSize: '1rem',
+      fontFamily: "'Poppins', sans-serif",
+      padding: '10px',
+      borderRadius: '10px',
+      border: 'none',
+      cursor: 'pointer',
+    },
+    signUpButton: {
+      backgroundColor: '#39B647',
+      color: '#FFF',
+      fontSize: '1rem',
+      fontFamily: "'Poppins', sans-serif",
+      padding: '10px',
+      borderRadius: '10px',
+      border: 'none',
+      cursor: 'pointer',
+    },
+  };
+  
+  export default LoginPage;
+  
