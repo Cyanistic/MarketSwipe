@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import CreateUser from './pages/CreateUser';
 import Shopping from './pages/Shopping';
 
+export const BASE_URL = import.meta.env.DEV ? "http://localhost:5000" : "";
+
 const App = () => {
   // Sets up routes
   let element = useRoutes([

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom'; // Use React Router for navigation
 import './AuthForm.css';
+import { BASE_URL } from '../App';
 
 const AuthForm = () => {
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ const AuthForm = () => {
 
     try {
       // Post the login details to the auth route
-      const response = await axios.post('http://127.0.0.1:5000/api/auth/login', { email, password });
+      const response = await axios.post(`${BASE_URL}/api/auth/login`, { email, password });
 
       if (response.status === 200) {
         // On successful login, store the JWT token in localStorage
