@@ -32,12 +32,26 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
     seller_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    seller = db.relationship("User", backref="user")
-    category = db.relationship("Category", backref="category")
+    seller = db.relationship("User", backref="product")
+    category = db.relationship("Category", backref="product")
+    tags = db.relationship('Tag', secondary='product_tag', backref='products')
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
     modified_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.now(timezone.utc)
+    )
+
+
+class ProductTag(db.Model):
+    product_id = db.Column(
+        db.Integer, db.ForeignKey("product.id"), primary_key=True, nullable=False
+    )
+    tag_id = db.Column(
+        db.Integer, db.ForeignKey("tag.id"), primary_key=True, nullable=False
+    )
+    # tag = db.relationship("Tag", backref="product_tag")
+    created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
@@ -49,8 +63,12 @@ class SwipeHistory(db.Model):
     product_id = db.Column(
         db.Integer, db.ForeignKey("product.id"), nullable=False, primary_key=True
     )
+    category_id = db.Column(
+        db.Integer, db.ForeignKey("category.id"), nullable=False
+    )
     user = db.relationship("User", backref="swipe_history")
     product = db.relationship("Product", backref="swipe_history")
+    category = db.relationship("Category", backref="swipe_history")
     liked = db.Column(db.Boolean, nullable=False)
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
@@ -100,7 +118,10 @@ class CreateProductSchema(CamelCaseSchema):
 def create_product():
     data = CreateProductSchema().load(request.get_json())
     new_product = Product(
-        name=data["name"], price=data["price"], category_id=data["category_id"], seller_id=current_user.id
+        name=data["name"],
+        price=data["price"],
+        category_id=data["category_id"],
+        seller_id=current_user.id,
     )
     db.session.add(new_product)
     db.session.commit()
@@ -133,6 +154,7 @@ def get_product(id):
 @products_bp.route("/<int:id>/uploads", methods=["GET"])
 def get_product_uploads(id):
     from upload import ProductUpload, Upload, UploadSchema
+
     product_uploads_schema = UploadSchema(many=True)
     product_uploads = (
         Upload.query.join(ProductUpload, ProductUpload.upload_id == Upload.id)
@@ -231,3 +253,99 @@ def create_tag():
 def get_tags():
     tags = Tag.query.all()
     return jsonify(tags_schema.dump(tags)), 200
+
+
+@products_bp.route("/swipe", methods=["POST"])
+@jwt_required()
+def record_swipe_and_recommend():
+    data = request.get_json()
+    product_id = data["product_id"]
+    liked = data["liked"]
+    
+    # Get the category of the swiped product
+    swiped_product = Product.query.get(product_id)
+    category_id = swiped_product.category_id
+    
+    # Check if the swipe history already exists
+    swipe_history = SwipeHistory.query.filter_by(user_id=current_user.id, product_id=product_id).first()
+    
+    if swipe_history:
+        # Update the existing swipe history
+        swipe_history.liked = liked
+        swipe_history.created_at = datetime.now(timezone.utc)
+    else:
+        # Create a new swipe history record
+        swipe_history = SwipeHistory(
+            user_id=current_user.id,
+            product_id=product_id,
+            category_id=category_id,  # Store category_id
+            liked=liked
+        )
+        db.session.add(swipe_history)
+    
+    db.session.commit()
+    
+    # Get the category of the swiped product
+    swiped_product = db.session.get(Product, product_id)
+    category_id = swiped_product.category_id
+    
+    # Get all swipe history for the user within the same category
+    user_swipe_history = (
+        db.session.query(SwipeHistory)
+        .join(Product, SwipeHistory.product_id == Product.id)
+        .filter(SwipeHistory.user_id == current_user.id, Product.category_id == category_id)
+        .order_by(SwipeHistory.created_at.desc())
+        .all()
+    )
+    
+    # Calculate tag weights based on swipe history within the same category
+    tag_weights = {}
+    for i, swipe in enumerate(user_swipe_history):
+        weight = 1 / (i + 1)  # Recent swipes have more weight
+        product = db.session.get(Product, swipe.product_id)
+        for tag in product.tags:
+            if tag.id not in tag_weights:
+                tag_weights[tag.id] = 0
+            tag_weights[tag.id] += weight if swipe.liked else -weight
+    
+    # Score products based on tag weights within the same category
+    products = Product.query.filter_by(category_id=category_id).all()
+    product_scores = []
+    for product in products:
+        if product.id == product_id:
+            continue  # Skip the current product
+        score = sum(tag_weights.get(tag.id, 0) for tag in product.tags)
+        product_scores.append((product, score))
+    
+    # Sort products by score in descending order
+    product_scores.sort(key=lambda x: x[1], reverse=True)
+    
+    # Recommend the product with the highest score
+    if product_scores:
+        recommended_product = product_scores[0][0]
+        return jsonify(product_schema.dump(recommended_product)), 200
+    else:
+        return jsonify({"message": "No more products to recommend based on your preferences"}), 200
+
+# Reset all swipe history for the current user
+@products_bp.route("/reset", methods=["POST"])
+@jwt_required()
+def reset_all_swipe_history():
+    SwipeHistory.query.filter_by(user_id=current_user.id).delete()
+    db.session.commit()
+    return jsonify({"message": "All swipe history reset successfully"}), 200
+
+# Reset swipe history for a given category for the current user
+@products_bp.route("/reset/<int:category_id>", methods=["POST"])
+@jwt_required()
+def reset_category_swipe_history(category_id):
+    swipe_histories = SwipeHistory.query.join(Product, SwipeHistory.product_id == Product.id) \
+        .filter(SwipeHistory.user_id == current_user.id, Product.category_id == category_id).all()
+    
+    for swipe_history in swipe_histories:
+        db.session.delete(swipe_history)
+    
+    db.session.commit()
+    return jsonify({"message": f"Swipe history for category {category_id} reset successfully"}), 200
+
+
