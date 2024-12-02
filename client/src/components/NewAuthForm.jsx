@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './AuthForm.css';
 
 const NewAuthForm = () => {
@@ -8,6 +8,7 @@ const NewAuthForm = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,58 +19,72 @@ const NewAuthForm = () => {
       return;
     }
 
-    try {
-      const response = await axios.post('/auth/register', { email, password });
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
+    }
 
+    try {
+      const response = await axios.post('http://127.0.0.1:5000/api/auth/register', { email, password });
       if (response.status === 201) {
-        // On successful registration, navigate back to the login page
         alert('User successfully created!');
+        navigate('/login');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong during registration!');
+      if (err.response) {
+        setError(err.response?.data?.message || 'Something went wrong during registration!');
+      } else if (err.request) {
+        setError('No response from the server. Please check if the server is running.');
+      } else {
+        setError('Error in setting up request: ' + err.message);
+      }
     }
   };
 
   return (
-    <form className='auth-form' onSubmit={handleSubmit}>
-        <div className='input-group'>
-            <label>Email:</label>
-            <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-            />
-        </div>
+    <form className="auth-form" onSubmit={handleSubmit}>
+      <div className="input-group">
+        <label>Email:</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="example@mail.com"
+          required
+        />
+      </div>
 
-        <div className='input-group'>
-            <label>Password:</label>
-            <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-            />
-        </div>
+      <div className="input-group">
+        <label>Password:</label>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Str0ngP4ssw0rd!"
+          required
+        />
+      </div>
 
-        <div className='input-group'>
-            <label>Confirm Password:</label>
-            <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-            />
-        </div>
+      <div className="input-group">
+        <label>Confirm Password:</label>
+        <input
+          type="password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="***************"
+          required
+        />
+      </div>
 
-        {error && <div className='error'>{error}</div>}
+      {error && <div className="error">{error}</div>}
 
-        <div className='center'>
-            <button type="submit">Create Account</button>
-        </div>
-        <div className='link'>
-            <Link to="/login">Already have an account? Login</Link> {/* Link to login page */}
-        </div>
+      <div className="center">
+        <button type="submit">Create Account</button>
+      </div>
+
+      <div className="link">
+        <Link to="/login">Already have an account? Login</Link>
+      </div>
     </form>
   );
 };
