@@ -40,6 +40,7 @@ class CreateUserSchema(ma.Schema):
     """
     Schema for creating a new user.
     """
+
     email = fields.Email(required=True)
     password = fields.String(required=True, validate=validate_password)
 
@@ -83,7 +84,9 @@ def login():
         password = request.json["password"]
         if not (user := User.query.filter_by(email=email).first()):
             return jsonify({"message": "Invalid email or password"}), 401
-        if not PasswordHasher().verify(user.password_hash, password):
+        try:
+            PasswordHasher().verify(user.password_hash, password)
+        except:
             return jsonify({"message": "Invalid email or password "}), 401
         dump_user = user_schema.dump(user)
         token = create_access_token(identity=dump_user)
