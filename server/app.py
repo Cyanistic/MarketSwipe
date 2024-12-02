@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
+import logging
 import os
 from typing import Any, Optional
 from flask import Blueprint, Flask, Request, jsonify, request
+from flask_cors import CORS
 from flask_marshmallow.schema import Schema
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -22,10 +24,16 @@ app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(days=1)
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1000 * 1000
 app.config["UPLOAD_FOLDER"] = "uploads"
 
+
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
 migrate = Migrate(app, db, render_as_batch=True)
 jwt = JWTManager(app)
+
+
+# Conditionally enable CORS in development mode
+if os.getenv("PRODUCTION") != "1":
+    cors = CORS(app)
 
 
 def on_json_loading_failed(self, e: Optional[ValueError]) -> Any:
