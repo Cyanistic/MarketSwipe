@@ -48,7 +48,7 @@ const App = () => {
               Whether you're looking for daily essentials or unique finds, Market Swipe helps you make informed decisions with a swipe.
             </p>
           </div>
-          <Link to="/login">
+          <Link to="/shopping">
             <button className="centerButton">Start Shopping Now!</button>
           </Link>
         </div>
