@@ -311,6 +311,23 @@ def delete_category(id):
     db.session.commit()
     return jsonify({"message": "Category deleted successfully"}), 200
 
+# Get recommended products on given category
+@products_bp.route("/categories/<int:category_id>", methods=["GET"])
+def get_recommended_products(category_id):
+    """
+    Get recommended products for the current user within a specific category.
+
+    Args:
+        category_id (int): The ID of the category.
+        num_products (int, optional): The number of products to recommend. Defaults to 3.
+
+    Returns:
+        Response: A JSON response containing the recommended products.
+    """
+    data = request.get_json()
+    products = recommend(current_user.id, category_id, num_products=data.get("num_products", 3))
+    return jsonify(products_schema.dump(products)), 200
+
 
 # Tag CRUD Endpoints
 
@@ -336,6 +353,55 @@ def get_tags():
     tags = Tag.query.all()
     return jsonify(tags_schema.dump(tags)), 200
 
+def recommend(user_id, category_id, num_products=1):
+    """
+    Recommend products to a user based on their swipe history within a specific category.
+
+    Args:
+        user_id (int): The ID of the user.
+        category_id (int): The ID of the category.
+        num_products (int, optional): The number of products to recommend. Defaults to 1.
+
+    Returns:
+        list: A list of recommended products, or None if no recommendations are available.
+    """
+    # Get all swipe history for the user within the same category
+    user_swipe_history = (
+        db.session.query(SwipeHistory)
+        .join(Product, SwipeHistory.product_id == Product.id)
+        .filter(
+            SwipeHistory.user_id == user_id, Product.category_id == category_id
+        )
+        .order_by(SwipeHistory.created_at.desc())
+        .all()
+    )
+    # Calculate tag weights based on swipe history within the same category
+    tag_weights = {}
+    swiped_product_ids = set()
+    for i, swipe in enumerate(user_swipe_history):
+        weight = 1 / (i + 1)  # Recent swipes have more weight
+        product = db.session.get(Product, swipe.product_id)
+        swiped_product_ids.add(product.id)
+        for tag in product.tags:
+            if tag.id not in tag_weights:
+                tag_weights[tag.id] = 0
+            tag_weights[tag.id] += weight if swipe.liked else -weight
+    # Score products based on tag weights within the same category
+    products = Product.query.filter_by(category_id=category_id).all()
+    product_scores = []
+    for product in products:
+        if product.id in swiped_product_ids:
+            continue
+        score = sum(tag_weights.get(tag.id, 0) for tag in product.tags)
+        product_scores.append((product, score))
+    # Sort products by score in descending order
+    product_scores.sort(key=lambda x: x[1], reverse=True)
+    # Recommend the product with the highest scores
+    if product_scores:
+        recommended_products = list(map(lambda x: x[0], product_scores[:num_products]))
+        return recommended_products
+    else:
+        return None
 
 @products_bp.route("/swipe", methods=["POST"])
 @jwt_required()
@@ -373,43 +439,9 @@ def record_swipe_and_recommend():
     swiped_product = db.session.get(Product, product_id)
     category_id = swiped_product.category_id
 
-    # Get all swipe history for the user within the same category
-    user_swipe_history = (
-        db.session.query(SwipeHistory)
-        .join(Product, SwipeHistory.product_id == Product.id)
-        .filter(
-            SwipeHistory.user_id == current_user.id, Product.category_id == category_id
-        )
-        .order_by(SwipeHistory.created_at.desc())
-        .all()
-    )
-
-    # Calculate tag weights based on swipe history within the same category
-    tag_weights = {}
-    for i, swipe in enumerate(user_swipe_history):
-        weight = 1 / (i + 1)  # Recent swipes have more weight
-        product = db.session.get(Product, swipe.product_id)
-        for tag in product.tags:
-            if tag.id not in tag_weights:
-                tag_weights[tag.id] = 0
-            tag_weights[tag.id] += weight if swipe.liked else -weight
-
-    # Score products based on tag weights within the same category
-    products = Product.query.filter_by(category_id=category_id).all()
-    product_scores = []
-    for product in products:
-        if product.id == product_id:
-            continue  # Skip the current product
-        score = sum(tag_weights.get(tag.id, 0) for tag in product.tags)
-        product_scores.append((product, score))
-
-    # Sort products by score in descending order
-    product_scores.sort(key=lambda x: x[1], reverse=True)
-
-    # Recommend the product with the highest score
-    if product_scores:
-        recommended_product = product_scores[0][0]
-        return jsonify(product_schema.dump(recommended_product)), 200
+    recommended_product = recommend(current_user.id, category_id)
+    if recommended_product:
+        return jsonify(product_schema.dump(recommended_product[0])), 200
     else:
         return (
             jsonify(
@@ -417,7 +449,6 @@ def record_swipe_and_recommend():
             ),
             200,
         )
-
 
 # Reset all swipe history for the current user
 @products_bp.route("/reset", methods=["POST"])

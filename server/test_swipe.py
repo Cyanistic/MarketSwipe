@@ -86,7 +86,7 @@ def test_swipe_and_recommend(test_client, access_token):
     # Swipe left (dislike) on Laptop
     response = test_client.post('/api/products/swipe', json={'product_id': 2, 'liked': False}, headers=headers)
     assert response.status_code == 200
-    assert response.get_json()['name'] not in ['Laptop']
+    assert response.get_json()['message'] == 'No more products to recommend based on your preferences'
     
     # Swipe right (like) on T-shirt
     response = test_client.post('/api/products/swipe', json={'product_id': 3, 'liked': True}, headers=headers)
@@ -96,7 +96,7 @@ def test_swipe_and_recommend(test_client, access_token):
     # Swipe left (dislike) on Jeans
     response = test_client.post('/api/products/swipe', json={'product_id': 4, 'liked': False}, headers=headers)
     assert response.status_code == 200
-    assert response.get_json()['name'] not in ['Jeans']
+    assert response.get_json()['message'] == 'No more products to recommend based on your preferences'
     
     # Swipe right (like) on Sofa
     response = test_client.post('/api/products/swipe', json={'product_id': 5, 'liked': True}, headers=headers)
@@ -106,7 +106,7 @@ def test_swipe_and_recommend(test_client, access_token):
     # Swipe left (dislike) on Coffee Table
     response = test_client.post('/api/products/swipe', json={'product_id': 6, 'liked': False}, headers=headers)
     assert response.status_code == 200
-    assert response.get_json()['name'] not in ['Coffee Table']
+    assert response.get_json()['message'] == 'No more products to recommend based on your preferences'
     
     # Swipe right (like) on Basketball
     response = test_client.post('/api/products/swipe', json={'product_id': 7, 'liked': True}, headers=headers)
@@ -116,7 +116,7 @@ def test_swipe_and_recommend(test_client, access_token):
     # Swipe left (dislike) on Tennis Racket
     response = test_client.post('/api/products/swipe', json={'product_id': 8, 'liked': False}, headers=headers)
     assert response.status_code == 200
-    assert response.get_json()['name'] not in ['Tennis Racket']
+    assert response.get_json()['message'] == 'No more products to recommend based on your preferences'
     
     # Swipe right (like) on Novel
     response = test_client.post('/api/products/swipe', json={'product_id': 9, 'liked': True}, headers=headers)
@@ -126,7 +126,7 @@ def test_swipe_and_recommend(test_client, access_token):
     # Swipe left (dislike) on Cookbook
     response = test_client.post('/api/products/swipe', json={'product_id': 10, 'liked': False}, headers=headers)
     assert response.status_code == 200
-    assert response.get_json()['name'] in ['Novel']
+    assert response.get_json()['message'] == 'No more products to recommend based on your preferences'
 
 def test_reset_category_swipe_history(test_client, access_token):
     headers = {"Authorization": f"Bearer {access_token}"}
