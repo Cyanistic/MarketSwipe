@@ -4,7 +4,7 @@ from app import CamelCaseSchema, SQLAlchemyAutoCamelCaseSchema, db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from auth import User
+from upload import Upload, UploadSchema
 
 products_bp = Blueprint("product", __name__, url_prefix="/products")
 
@@ -26,6 +26,18 @@ class Category(db.Model):
     )
 
 
+class ProductUpload(db.Model):
+    """
+    Model representing the association between a product and an uploaded file.
+    """
+
+    upload_id = db.Column(db.Integer, db.ForeignKey("upload.id"), primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey("product.id"), primary_key=True)
+    created_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.now(timezone.utc)
+    )
+
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(120), nullable=False)
@@ -34,7 +46,8 @@ class Product(db.Model):
     seller_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     seller = db.relationship("User", backref="product")
     category = db.relationship("Category", backref="product")
-    tags = db.relationship('Tag', secondary='product_tag', backref='products')
+    tags = db.relationship("Tag", secondary="product_tag", backref="products")
+    uploads = db.relationship("Upload", secondary="product_upload", backref="products")
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
@@ -63,9 +76,7 @@ class SwipeHistory(db.Model):
     product_id = db.Column(
         db.Integer, db.ForeignKey("product.id"), nullable=False, primary_key=True
     )
-    category_id = db.Column(
-        db.Integer, db.ForeignKey("category.id"), nullable=False
-    )
+    category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=False)
     user = db.relationship("User", backref="swipe_history")
     product = db.relationship("Product", backref="swipe_history")
     category = db.relationship("Category", backref="swipe_history")
@@ -107,6 +118,8 @@ class CreateProductSchema(CamelCaseSchema):
     name = fields.String(required=True)
     price = fields.Float(required=True)
     category_id = fields.Integer(required=True)
+    tags = fields.List(fields.String())
+    uploads = fields.List(fields.Integer())
 
     class Meta:
         unknown = EXCLUDE
@@ -116,20 +129,55 @@ class CreateProductSchema(CamelCaseSchema):
 @products_bp.route("/", methods=["POST"])
 @jwt_required()
 def create_product():
+    """
+    Update an existing product.
+
+    Request JSON:
+    {
+        "name": "Updated Product Name",
+        "price": 150.0,
+        "category_id": 2,
+        "tag_names": ["tag3", "tag4"],  # Pass an empty list to remove all tags
+        "upload_ids": [4, 5, 6]         # Pass an empty list to remove all uploads
+    }
+
+    Returns:
+        JSON response with a success message and the updated product.
+    """
     data = CreateProductSchema().load(request.get_json())
-    new_product = Product(
+    tag_names = data.get("tag_names", None)
+    upload_ids = data.get("upload_ids", None)
+
+    product = Product(
         name=data["name"],
         price=data["price"],
         category_id=data["category_id"],
         seller_id=current_user.id,
     )
-    db.session.add(new_product)
+
+    # Update tags
+    if tag_names is not None:
+        tags = []
+        for name in tag_names:
+            tag = Tag.query.filter_by(name=name).first()
+            if not tag:
+                tag = Tag(name=name)
+                db.session.add(tag)
+            tags.append(tag)
+        product.tags = tags
+    
+    # Update uploads
+    if upload_ids is not None:
+        uploads = Upload.query.filter(Upload.id.in_(upload_ids)).all()
+        product.uploads = uploads
+
+    db.session.add(product)
     db.session.commit()
     return (
         jsonify(
             {
                 "message": "Product created successfully",
-                "product": product_schema.dump(new_product),
+                "product": product_schema.dump(product),
             }
         ),
         201,
@@ -153,7 +201,6 @@ def get_product(id):
 # Get all uploads associated with a product
 @products_bp.route("/<int:id>/uploads", methods=["GET"])
 def get_product_uploads(id):
-    from upload import ProductUpload, Upload, UploadSchema
 
     product_uploads_schema = UploadSchema(many=True)
     product_uploads = (
@@ -167,11 +214,46 @@ def get_product_uploads(id):
 # UPDATE Product
 @products_bp.route("/<int:id>", methods=["PUT"])
 def update_product(id):
+    """
+    Update an existing product.
+
+    Request JSON:
+    {
+        "name": "Updated Product Name",
+        "price": 150.0,
+        "category_id": 2,
+        "tag_names": ["tag3", "tag4"],
+        "upload_ids": [4, 5, 6]
+    }
+
+    Returns:
+        JSON response with a success message and the updated product.
+    """
     data = request.get_json()
+    tag_names = data.get("tags", [])
+    uploads = data.get("uploads", [])
+
     product = Product.query.get_or_404(id)
     product.name = data.get("name", product.name)
     product.price = data.get("price", product.price)
     product.category_id = data.get("category_id", product.category_id)
+
+    # Update tags
+    if tag_names:
+        tags = []
+        for name in tag_names:
+            tag = Tag.query.filter_by(name=name).first()
+            if not tag:
+                tag = Tag(name=name)
+                db.session.add(tag)
+            tags.append(tag)
+        product.tags = tags
+
+    # Update uploads
+    if uploads:
+        uploads = Upload.query.filter(Upload.id.in_(uploads)).all()
+        product.uploads = uploads
+
     db.session.commit()
     return (
         jsonify(
@@ -261,14 +343,16 @@ def record_swipe_and_recommend():
     data = request.get_json()
     product_id = data["product_id"]
     liked = data["liked"]
-    
+
     # Get the category of the swiped product
     swiped_product = Product.query.get(product_id)
     category_id = swiped_product.category_id
-    
+
     # Check if the swipe history already exists
-    swipe_history = SwipeHistory.query.filter_by(user_id=current_user.id, product_id=product_id).first()
-    
+    swipe_history = SwipeHistory.query.filter_by(
+        user_id=current_user.id, product_id=product_id
+    ).first()
+
     if swipe_history:
         # Update the existing swipe history
         swipe_history.liked = liked
@@ -279,25 +363,27 @@ def record_swipe_and_recommend():
             user_id=current_user.id,
             product_id=product_id,
             category_id=category_id,  # Store category_id
-            liked=liked
+            liked=liked,
         )
         db.session.add(swipe_history)
-    
+
     db.session.commit()
-    
+
     # Get the category of the swiped product
     swiped_product = db.session.get(Product, product_id)
     category_id = swiped_product.category_id
-    
+
     # Get all swipe history for the user within the same category
     user_swipe_history = (
         db.session.query(SwipeHistory)
         .join(Product, SwipeHistory.product_id == Product.id)
-        .filter(SwipeHistory.user_id == current_user.id, Product.category_id == category_id)
+        .filter(
+            SwipeHistory.user_id == current_user.id, Product.category_id == category_id
+        )
         .order_by(SwipeHistory.created_at.desc())
         .all()
     )
-    
+
     # Calculate tag weights based on swipe history within the same category
     tag_weights = {}
     for i, swipe in enumerate(user_swipe_history):
@@ -307,7 +393,7 @@ def record_swipe_and_recommend():
             if tag.id not in tag_weights:
                 tag_weights[tag.id] = 0
             tag_weights[tag.id] += weight if swipe.liked else -weight
-    
+
     # Score products based on tag weights within the same category
     products = Product.query.filter_by(category_id=category_id).all()
     product_scores = []
@@ -316,16 +402,22 @@ def record_swipe_and_recommend():
             continue  # Skip the current product
         score = sum(tag_weights.get(tag.id, 0) for tag in product.tags)
         product_scores.append((product, score))
-    
+
     # Sort products by score in descending order
     product_scores.sort(key=lambda x: x[1], reverse=True)
-    
+
     # Recommend the product with the highest score
     if product_scores:
         recommended_product = product_scores[0][0]
         return jsonify(product_schema.dump(recommended_product)), 200
     else:
-        return jsonify({"message": "No more products to recommend based on your preferences"}), 200
+        return (
+            jsonify(
+                {"message": "No more products to recommend based on your preferences"}
+            ),
+            200,
+        )
+
 
 # Reset all swipe history for the current user
 @products_bp.route("/reset", methods=["POST"])
@@ -335,17 +427,26 @@ def reset_all_swipe_history():
     db.session.commit()
     return jsonify({"message": "All swipe history reset successfully"}), 200
 
+
 # Reset swipe history for a given category for the current user
 @products_bp.route("/reset/<int:category_id>", methods=["POST"])
 @jwt_required()
 def reset_category_swipe_history(category_id):
-    swipe_histories = SwipeHistory.query.join(Product, SwipeHistory.product_id == Product.id) \
-        .filter(SwipeHistory.user_id == current_user.id, Product.category_id == category_id).all()
-    
+    swipe_histories = (
+        SwipeHistory.query.join(Product, SwipeHistory.product_id == Product.id)
+        .filter(
+            SwipeHistory.user_id == current_user.id, Product.category_id == category_id
+        )
+        .all()
+    )
+
     for swipe_history in swipe_histories:
         db.session.delete(swipe_history)
-    
+
     db.session.commit()
-    return jsonify({"message": f"Swipe history for category {category_id} reset successfully"}), 200
-
-
+    return (
+        jsonify(
+            {"message": f"Swipe history for category {category_id} reset successfully"}
+        ),
+        200,
+    )

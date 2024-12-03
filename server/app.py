@@ -27,7 +27,7 @@ app.config["UPLOAD_FOLDER"] = "uploads"
 
 db = SQLAlchemy(app)
 ma = Marshmallow(app)
-migrate = Migrate(app, db, render_as_batch=True)
+migrate = Migrate(app, db)
 jwt = JWTManager(app)
 
 

@@ -18,23 +18,10 @@ class Upload(db.Model):
     """
     Model representing an uploaded file.
     """
+
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     path = db.Column(db.String(120), nullable=False, unique=True)
     mime = db.Column(db.String(120), nullable=False)
-    created_at = db.Column(
-        db.DateTime, nullable=False, default=datetime.now(timezone.utc)
-    )
-
-
-class ProductUpload(db.Model):
-    """
-    Model representing the association between a product and an uploaded file.
-    """
-    from products import Product
-    upload_id = db.Column(db.Integer, db.ForeignKey("upload.id"), primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey("product.id"), primary_key=True)
-    upload = db.relationship("Upload", backref="product_upload")
-    product = db.relationship("Product", backref="product_upload")
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
