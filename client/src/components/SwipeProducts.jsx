@@ -1,126 +1,123 @@
 import React, { useState, useEffect } from "react";
 import TinderCard from "react-tinder-card";
 import axios from "axios";
-import { BASE_URL } from '../App';
+import ProductModal from "./ProductModal";
+import { Link } from "react-router-dom";
+import "./SwipeProducts.css";
+import { BASE_URL } from "../App";
 
 const SwipeProducts = () => {
   const [products, setProducts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [likeList, setLikeList] = useState([]);
-  const [skipped, setSkipped] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [likedTags, setLikedTags] = useState([]);
+  const [swipeDirection, setSwipeDirection] = useState("");
 
+  // Fetch products from the backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/products/`);
+        const response = await axios.get(`${BASE_URL}/api/products`);
         setProducts(response.data);
-        setLoading(false);
       } catch (error) {
         console.error("Error fetching products:", error);
-        setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  const handleSwipe = (direction) => {
-    const currentProduct = products[currentIndex];
-    if (direction === "right") {
-      setLikeList([...likeList, currentProduct]);
-    } else if (direction === "left") {
-      setSkipped([...skipped, currentProduct]);
-    }
-
-    if (currentIndex < products.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      console.log("No more products!");
-    }
+  // Filter products based on liked tags
+  const filterProductsByTags = () => {
+    if (likedTags.length === 0) return products;
+    return products.filter((product) =>
+      product.tags.some((tag) => likedTags.includes(tag))
+    );
   };
 
-  if (loading) {
-    return <p>Loading products...</p>;
-  }
+  // Update current index and handle liking a product
+  const updateIndex = (direction) => {
+    const likedProduct = products[currentIndex];
+    if (direction === "right") {
+      setLikedTags((prevTags) => [
+        ...new Set([...prevTags, ...likedProduct.tags]),
+      ]);
+    }
 
-  if (currentIndex >= products.length) {
-    return <p>No more products to show!</p>;
+    // Increment currentIndex
+    setCurrentIndex((prevIndex) => {
+      if (prevIndex < products.length - 1) {
+        return prevIndex + 1;
+      } else {
+        console.log("No more products!");
+        return prevIndex; // No more products to show
+      }
+    });
+  };
+
+  const handleSwipe = (direction) => {
+    setSwipeDirection(direction);
+    updateIndex(direction);
+  };
+
+  const swipeManually = (direction) => {
+    setSwipeDirection(direction);
+    updateIndex(direction);
+  };
+
+  // Modal controls
+  const handleMoreDetails = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
+
+  const filteredProducts = filterProductsByTags();
+
+  if (currentIndex >= filteredProducts.length) {
+    return <p className="swipe-container">No more products to show!</p>;
   }
 
   return (
-    <div className="swipe-container">
-      <TinderCard
-        key={products[currentIndex].id}
-        onSwipe={(dir) => handleSwipe(dir)}
-        className="swipe-card"
-      >
-        <div>
-          <h3>{products[currentIndex].name}</h3>
-          <img
-            src={products[currentIndex].image}
-            alt={products[currentIndex].name}
-            style={{ width: "100%", borderRadius: "10px" }}
-          />
-          <p>{products[currentIndex].description}</p>
-        </div>
-      </TinderCard>
-
-      {/* More Details Button */}
-      <button
-        style={{ marginTop: "20px" }}
-        onClick={handleMoreDetails}
-      >
-        More Details
-      </button>
-
-      {/* Modal for Product Details */}
-      <Modal
-        isOpen={isModalOpen}
-        onRequestClose={closeModal}
-        contentLabel="Product Details"
-        ariaHideApp={false} // Prevent accessibility warnings
-        style={{
-          content: {
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between', // Ensures content stays spaced
-            alignItems: 'center',
-            padding: '20px',
-            width: '400px',
-            height: '300px',
-            margin: 'auto',
-            borderRadius: '10px',
-            textAlign: 'center',
-          },
-        }}
-      >
-        <div>
-          <h2>{products[currentIndex].name}</h2>
-          <p>{products[currentIndex].description}</p>
-          <img
-            src={products[currentIndex].image}
-            alt={products[currentIndex].name}
-            style={{ width: '100%', borderRadius: '10px' }}
-          />
-        </div>
-
-        {/* Close button at the bottom */}
-        <button
-          onClick={closeModal}
-          style={{
-            marginTop: 'auto', // Ensures it sticks to the bottom
-            padding: '10px 20px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
+    <div className="swipe-products">
+      <div className="swipe-container">
+        <TinderCard
+          key={filteredProducts[currentIndex]?.id}
+          onSwipe={handleSwipe}
+          className="swipe-card"
+          preventSwipe={["up", "down"]}
         >
-          Close
+          <div>
+            <h3>{filteredProducts[currentIndex]?.name}</h3>
+            <img
+              src={filteredProducts[currentIndex]?.uploads?.[0]?.url || ""}
+              alt={filteredProducts[currentIndex]?.name}
+            />
+            <p>{filteredProducts[currentIndex]?.description}</p>
+          </div>
+        </TinderCard>
+
+        <div className="swipe-buttons">
+          <button onClick={() => swipeManually("left")}>Swipe Left</button>
+          <button onClick={() => swipeManually("right")}>Swipe Right</button>
+        </div>
+
+        <button onClick={handleMoreDetails} className="modal-close-button">
+          More Details
         </button>
-      </Modal>
+
+        <div className="center-buttons">
+          <Link to="/likes">
+            <button className="centerButton">LikeList</button>
+          </Link>
+
+          <Link to="/history">
+            <button className="centerButton">History</button>
+          </Link>
+        </div>
+
+        <ProductModal
+          isOpen={isModalOpen}
+          closeModal={closeModal}
+          product={filteredProducts[currentIndex]}
+        />
+      </div>
     </div>
   );
 };

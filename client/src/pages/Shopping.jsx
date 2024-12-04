@@ -11,7 +11,7 @@ const Shopping = () => {
 
   return (
     <div>
-      <SwipeProducts key={userId} email={email} />
+      <SwipeProducts />
     </div>
   );
 };

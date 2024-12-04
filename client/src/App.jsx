@@ -12,20 +12,30 @@ export const BASE_URL = import.meta.env.DEV ? "http://localhost:5000" : "";
 const App = () => {
   // Sets up routes
   let element = useRoutes([
+
+    {
+      path: "/history",
+      element: (
+        <div className="fullPage">
+          <HistoryPage />
+        </div>
+      ),
+    },
     
+    {
+      path: "/add-product",
+      element: (
+        <div className="fullPage">
+          <LikeListPage />
+        </div>
+      ),
+    },
+
     {
       path: "/shopping",
       element: (
         <div className="fullPage">
           <Shopping />
-
-          <Link to="/likes">
-            <button className="centerButton">LikeList</button>
-          </Link>
-
-          <Link to="/history">
-            <button className="centerButton">History</button>
-          </Link>
         </div>
       ),
     },
