@@ -2,6 +2,7 @@ import './Shopping.css';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';  // Import Link from react-router-dom
 import SwipeProducts from "../components/SwipeProducts";
+import ProductModal from "../components/ProductModal";
 import { useLocation } from 'react-router-dom';
 
 const Shopping = () => {
