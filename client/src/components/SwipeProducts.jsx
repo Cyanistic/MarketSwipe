@@ -58,7 +58,7 @@ const SwipeProducts = () => {
     try {
       const response = await axios.post(
         `${BASE_URL}/api/cart/add`,
-        { product_id: currentProduct.id },
+        { productId: currentProduct.id },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,

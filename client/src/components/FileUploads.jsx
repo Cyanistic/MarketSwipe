@@ -35,7 +35,7 @@ export default function useFileAttachment() {
         setError(null);
 
         const response = await axios.post(
-          `${BASE_URL}/api/uploads/`,
+          `${BASE_URL}/api/upload/`,
           { file_data: base64Data },
           {
             headers: {
@@ -44,6 +44,7 @@ export default function useFileAttachment() {
             },
           }
         );
+
 
         setAttachment(response.data.upload); // Save uploaded file metadata
         console.log("Upload successful:", response.data);
