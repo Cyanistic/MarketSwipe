@@ -21,6 +21,7 @@
   text-align: center;
   padding: 20px;
   margin-bottom: 20px;
+  transition: transform 0.3s ease;
 }
 
 /* Swipe left animation */
