@@ -17,7 +17,6 @@ const AuthForm = () => {
     try {
       // Post the login details to the auth route
       const response = await axios.post(`${BASE_URL}/api/auth/login`, { email, password });
-      console.log(response, "Logged in")
       if (response.status === 200) {
         // On successful login, store the JWT token in localStorage
         const token = response.headers['authorization']; // Get token from response header
