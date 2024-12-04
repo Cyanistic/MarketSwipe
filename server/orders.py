@@ -15,6 +15,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     user = db.relationship("User", backref="order")
+    items = db.relationship("Product", secondary="order_item", backref="order")
     total = db.Column(db.Numeric(10, 2), nullable=False)
     status = db.Column(db.String(20), default="pending")
     created_at = db.Column(
@@ -29,8 +30,6 @@ class OrderItem(db.Model):
     product_id = db.Column(
         db.Integer, db.ForeignKey("product.id"), nullable=False, primary_key=True
     )
-    order = db.relationship("Order", backref="order_item")
-    product = db.relationship("Product", backref="order_item")
     quantity = db.Column(db.Integer, nullable=False, default=1)
 
 
@@ -54,6 +53,7 @@ class OrderSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = Order
         include_fk = True
+        include_relationships = True
         load_instance = True
 
 
@@ -68,20 +68,7 @@ def get_orders():
     """
     user_id = current_user.id
     orders = Order.query.filter_by(user_id=user_id).all()
-    orders_list = [
-        {
-            "id": order.id,
-            "total": order.total,
-            "status": order.status,
-            "created_at": order.created_at.isoformat(),
-            "items": [
-                {"product_id": item.product_id, "quantity": item.quantity}
-                for item in OrderItem.query.filter_by(order_id=order.id).all()
-            ],
-        }
-        for order in orders
-    ]
-    return jsonify(orders_list), 200
+    return jsonify(OrderSchema().dump(orders, many=True)), 200
 
 
 @orders_bp.route("/<int:order_id>", methods=["GET"])
@@ -100,17 +87,7 @@ def get_order(order_id):
     order = Order.query.filter_by(id=order_id, user_id=user_id).first()
     if not order:
         return jsonify({"message": "Order not found"}), 404
-    order_details = {
-        "id": order.id,
-        "total": order.total,
-        "status": order.status,
-        "created_at": order.created_at.isoformat(),
-        "items": [
-            {"product_id": item.product_id, "quantity": item.quantity}
-            for item in OrderItem.query.filter_by(order_id=order.id).all()
-        ],
-    }
-    return jsonify(order_details), 200
+    return jsonify(OrderSchema().dump(order)), 200
 
 
 @orders_bp.route("/create", methods=["POST"])

@@ -88,10 +88,10 @@ class SwipeHistory(db.Model):
 
 # Schemas for serialization/deserialization
 class ProductSchema(SQLAlchemyAutoCamelCaseSchema):
-    Category = ma.Nested("CategorySchema")
-
     class Meta:
         model = Product
+        include_fk = True
+        include_relationships = True
 
 
 class CategorySchema(SQLAlchemyAutoCamelCaseSchema):
