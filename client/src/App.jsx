@@ -45,6 +45,14 @@ const App = () => {
       element: (
         <div className="fullPage">
           <Shopping />
+
+          <Link to="/likes">
+            <button className="centerButton">Create Product</button>
+          </Link>
+
+          <Link to="/history">
+            <button className="centerButton">History</button>
+          </Link>
         </div>
       ),
     },

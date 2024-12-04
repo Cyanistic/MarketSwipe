@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../App';
 
@@ -9,40 +9,91 @@ const LikeList = () => {
     category: '',
     tags: '',
   });
+  const [categories, setCategories] = useState([]); // List of categories from the backend
+  const [customCategory, setCustomCategory] = useState({
+    name: '',
+    description: '',
+  }); // For creating a new category
+
+  // Fetch categories from the backend on component mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${BASE_URL}/api/products/categories`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setCategories(response.data); // Assuming the server responds with a list of categories
+      } catch (error) {
+        console.error('Error fetching categories:', error.response?.data || error.message);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProductData({ ...productData, [name]: value });
   };
 
+  // Handle category selection
+  const handleCategoryChange = (e) => {
+    setProductData({ ...productData, category: e.target.value });
+  };
+
+  // Handle input for custom category (name and description)
+  const handleCustomCategoryChange = (e) => {
+    const { name, value } = e.target;
+    setCustomCategory({ ...customCategory, [name]: value });
+  };
+
+  // Handle adding a new category
+  const handleCreateCategory = async () => {
+    if (!customCategory.name.trim()) {
+      alert('Category name cannot be empty.');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.post(
+        `${BASE_URL}/api/products/categories`,
+        {
+          name: customCategory.name,
+          description: customCategory.description, // Include description in the payload
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const newCategory = response.data.category; // Assuming backend returns the created category
+      setCategories([...categories, newCategory]); // Add the new category to the dropdown
+      setProductData({ ...productData, category: newCategory.id }); // Set the newly created category
+      setCustomCategory({ name: '', description: '' }); // Clear the custom category input
+    } catch (error) {
+      console.error('Error creating category:', error.response?.data || error.message);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
     const productPayload = {
       name: productData.name,
       price: parseFloat(productData.price),
-      category: productData.category,
+      categoryId: productData.category, // Ensure category is the ID
       tags: productData.tags.split(',').map((tag) => tag.trim()),
     };
-  
-    // Validate payload
-    if (!productPayload.name || !productPayload.price || !productPayload.category) {
-      console.error('Invalid payload:', productPayload);
-      alert('Please fill in all required fields.');
-      return;
-    }
-  
+
+    const token = localStorage.getItem('token');
+
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.error('No token found');
-        alert('You must log in to perform this action.');
-        return;
-      }
-  
-      console.log('Token:', token);
-      console.log('Product Payload:', productPayload);
-  
       const response = await axios.post(
         `${BASE_URL}/api/products/`,
         productPayload,
@@ -53,13 +104,11 @@ const LikeList = () => {
           },
         }
       );
-  
       console.log('Product created successfully:', response.data);
     } catch (error) {
       console.error('Error creating product:', error.response?.data || error.message);
     }
   };
-  
 
   return (
     <form onSubmit={handleSubmit}>
@@ -88,14 +137,41 @@ const LikeList = () => {
       </div>
       <div>
         <label>Category:</label>
-        <input
-          type="text"
+        <select
           name="category"
           value={productData.category}
-          onChange={handleChange}
-          placeholder="Category"
+          onChange={handleCategoryChange}
           required
-        />
+        >
+          <option value="" disabled>
+            Select a category
+          </option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+        <div>
+          <label>Add Custom Category:</label>
+          <input
+            type="text"
+            name="name"
+            value={customCategory.name}
+            onChange={handleCustomCategoryChange}
+            placeholder="Custom Category Name"
+          />
+          <input
+            type="text"
+            name="description"
+            value={customCategory.description}
+            onChange={handleCustomCategoryChange}
+            placeholder="Custom Category Description"
+          />
+          <button type="button" onClick={handleCreateCategory}>
+            Add Category
+          </button>
+        </div>
       </div>
       <div>
         <label>Tags (comma separated):</label>
