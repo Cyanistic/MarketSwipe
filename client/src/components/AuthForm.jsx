@@ -21,6 +21,7 @@ const AuthForm = () => {
       if (response.status === 200) {
         // On successful login, store the JWT token in localStorage
         const token = response.headers['authorization']; // Get token from response header
+
         if (token) {
           localStorage.setItem('token', token.replace('Bearer ', ''));
         }
