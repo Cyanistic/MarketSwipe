@@ -33,7 +33,7 @@ jwt = JWTManager(app)
 
 # Conditionally enable CORS in development mode
 if os.getenv("PRODUCTION") != "1":
-    cors = CORS(app)
+    cors = CORS(app, expose_headers=["Content-Type", "Authorization", "Content-Length"])
 
 
 def on_json_loading_failed(self, e: Optional[ValueError]) -> Any:
