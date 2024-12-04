@@ -5,6 +5,7 @@ import { BASE_URL } from "../App";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
+  const [productDetails, setProductDetails] = useState({});
 
   // Fetch cart items on component mount
   useEffect(() => {
@@ -16,10 +17,30 @@ const Cart = () => {
           },
         });
         setCartItems(response.data);
+        // Fetch product details for each product in the cart
+        fetchProductDetails(response.data);
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
     };
+
+    const fetchProductDetails = async (cartItems) => {
+      const details = {};
+      for (const item of cartItems) {
+        try {
+          const response = await axios.get(`${BASE_URL}/api/products/${item.product}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          details[item.product] = response.data; // Store product details
+        } catch (error) {
+          console.error(`Error fetching details for product ${item.product}:`, error);
+        }
+      }
+      setProductDetails(details); // Update the product details in the state
+    };
+
     fetchCart();
   }, []);
 
@@ -37,11 +58,21 @@ const Cart = () => {
       );
       alert(response.data.message); // Show success message
       // Re-fetch cart items after removing the product
-      setCartItems(cartItems.filter((item) => item.product_id !== productId));
+      setCartItems(cartItems.filter((item) => item.product !== productId));
     } catch (error) {
       console.error("Error removing product from cart:", error);
       alert(error.response?.data?.message || "Failed to remove product");
     }
+  };
+
+  const getTotalPrice = () => {
+    return cartItems.reduce((total, item) => {
+      const product = productDetails[item.product];
+      if (product) {
+        return total + product.price * item.quantity;
+      }
+      return total;
+    }, 0);
   };
 
   return (
@@ -51,21 +82,30 @@ const Cart = () => {
         <p className="cart-empty-message">No items in cart.</p>
       ) : (
         <ul className="cart-item-list">
-          {cartItems.map((item) => (
-            <li key={item.product_id} className="cart-item">
-              <span className="cart-item-id">Product ID: {item.product_id}</span>, 
-              Quantity: {item.quantity}
-              {/* Add Remove button next to each product */}
-              <button
-                onClick={() => removeProductFromCart(item.product_id)}
-                className="remove-product-button"
-              >
-                Remove
-              </button>
-            </li>
-          ))}
+          {cartItems.map((item) => {
+            const product = productDetails[item.product];
+            if (!product) return null; // Skip if product details are not loaded yet
+
+            return (
+              <li key={item.product} className="cart-item">
+                <span className="cart-item-name">{product.name}</span>
+                <span className="cart-item-price">${product.price}</span>
+                <span className="cart-item-quantity">Quantity: {item.quantity}</span>
+                {/* Add Remove button next to each product */}
+                <button
+                  onClick={() => removeProductFromCart(item.product)}
+                  className="remove-product-button"
+                >
+                  Remove
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
+      <div className="cart-total">
+        <strong>Total: ${getTotalPrice().toFixed(2)}</strong>
+      </div>
     </div>
   );
 };

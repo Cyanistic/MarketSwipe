@@ -9,15 +9,15 @@ import { BASE_URL } from "../App";
 const SwipeProducts = () => {
   const [currentProduct, setCurrentProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [quantityModalOpen, setQuantityModalOpen] = useState(false); // State to manage the visibility of quantity modal
-  const [quantity, setQuantity] = useState(1); // State to store quantity value
+  const [quantityModalOpen, setQuantityModalOpen] = useState(false);
+  const [quantity, setQuantity] = useState(1);
 
   // Fetch the initial product
   useEffect(() => {
     const fetchFirstProduct = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/products`);
-        setCurrentProduct(response.data[0]);
+        setCurrentProduct(response.data[0]); // Set the first product
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -27,6 +27,7 @@ const SwipeProducts = () => {
 
   const handleSwipe = (direction) => {
     if (currentProduct) {
+      // Record the swipe
       axios
         .post(
           `${BASE_URL}/api/products/swipe`,
@@ -41,12 +42,46 @@ const SwipeProducts = () => {
           }
         )
         .then((response) => {
-          const recommendedProduct = response.data;
-          setCurrentProduct(recommendedProduct);
+          const nextProduct = response.data; // Get the next product from the response
+
+          if (!nextProduct) {
+            // If no more products are returned, reset swipe history
+            resetSwipeHistory();
+          } else {
+            // Set the next product as the current product
+            setCurrentProduct(nextProduct);
+          }
         })
         .catch((error) => {
-          console.error("Error recording swipe:", error);
+          if (error.response && error.response.status === 500) {
+            // If error 500 occurs, reset the swipe history
+            console.log("No more products, resetting swipe history...");
+            resetSwipeHistory();
+          } else {
+            console.error("Error recording swipe:", error);
+          }
         });
+    }
+  };
+
+  const resetSwipeHistory = async () => {
+    try {
+      await axios.post(
+        `${BASE_URL}/api/products/reset`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      alert("All swipe history has been reset!");
+      // After resetting, try to fetch the first product again
+      const response = await axios.get(`${BASE_URL}/api/products`);
+      setCurrentProduct(response.data[0]); // Reset the product list by fetching the first product
+    } catch (error) {
+      console.error("Error resetting swipe history:", error);
+      alert("Failed to reset swipe history.");
     }
   };
 
@@ -55,24 +90,28 @@ const SwipeProducts = () => {
   };
 
   const openQuantityModal = () => {
-    setQuantityModalOpen(true); // Open the quantity modal when Add to Cart is clicked
+    setQuantityModalOpen(true);
   };
 
   const closeQuantityModal = () => {
-    setQuantityModalOpen(false); // Close the modal when the user is done
+    setQuantityModalOpen(false);
   };
 
   const handleQuantityChange = (e) => {
-    setQuantity(e.target.value); // Update the quantity value
+    console.log(e.target.value);
+    setQuantity(e.target.value);
   };
 
   const handleAddToCart = async () => {
     if (!currentProduct || quantity < 1) return;
 
+    const parsedQuantity = parseInt(quantity, 10);
+
     try {
+      console.log(currentProduct.id, parsedQuantity)
       const response = await axios.post(
         `${BASE_URL}/api/cart/add`,
-        { productId: currentProduct.id, quantity: quantity },
+        { productId: currentProduct.id, quantity: parsedQuantity },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -80,7 +119,7 @@ const SwipeProducts = () => {
         }
       );
       alert(response.data.message);
-      closeQuantityModal(); // Close the modal after adding the product to the cart
+      closeQuantityModal();
     } catch (error) {
       console.error("Error adding product to cart:", error);
       alert(error.response?.data?.message || "Failed to add product to cart");
@@ -133,6 +172,7 @@ const SwipeProducts = () => {
                 min="1"
                 className="quantity-input"
               />
+
               <div className="modal-buttons">
                 <button onClick={handleAddToCart} className="confirm-add-to-cart">
                   Add to Cart
