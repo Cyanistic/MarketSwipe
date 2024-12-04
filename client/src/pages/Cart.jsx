@@ -9,6 +9,7 @@ const Cart = () => {
   const [productDetails, setProductDetails] = useState({});
   const navigate = useNavigate();
 
+  // Fetch cart items on component mount
   useEffect(() => {
     const fetchCart = async () => {
       try {
