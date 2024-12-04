@@ -6,3 +6,5 @@ uploads/
 *.pyo
 .env
 *.db
+
+__pycache__/
