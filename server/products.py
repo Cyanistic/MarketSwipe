@@ -20,7 +20,6 @@ class Tag(db.Model):
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     name = db.Column(db.String(120), unique=True, nullable=False)
-    description = db.Column(db.String(200))
     created_at = db.Column(
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
@@ -282,7 +281,7 @@ def delete_product(id):
 @products_bp.route("/categories", methods=["POST"])
 def create_category():
     data = request.get_json()
-    new_category = Category(name=data["name"], description=data.get("description"))
+    new_category = Category(name=data["name"])
     db.session.add(new_category)
     db.session.commit()
     return (
