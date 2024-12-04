@@ -17,7 +17,7 @@ const SwipeProducts = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/products`);
+        const response = await axios.get(`/products`);
         setProducts(response.data);
       } catch (error) {
         console.error("Error fetching products:", error);
