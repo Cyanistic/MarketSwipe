@@ -105,3 +105,73 @@ button:hover {
 .add-to-cart-button:active {
   background-color: #1e7e34; /* Even darker green on active */
 }
+
+/* Overlay to dim the background when modal is open */
+.quantity-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure the modal is on top of other content */
+}
+
+/* Modal container */
+.quantity-modal {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  width: 300px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Styling for the quantity input field */
+.quantity-input {
+  width: 80px;
+  padding: 8px;
+  margin-top: 10px;
+  text-align: center;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Button to confirm adding the product to cart */
+.confirm-add-to-cart {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.confirm-add-to-cart:hover {
+  background-color: #45a049;
+}
+
+/* Button to cancel the modal */
+.cancel-modal {
+  background-color: #f44336;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.cancel-modal:hover {
+  background-color: #e53935;
+}
+
+/* Modal close button styling */
+.modal-buttons button {
+  margin-right: 10px;
+}

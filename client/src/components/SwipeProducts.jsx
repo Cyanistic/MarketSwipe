@@ -9,6 +9,8 @@ import { BASE_URL } from "../App";
 const SwipeProducts = () => {
   const [currentProduct, setCurrentProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [quantityModalOpen, setQuantityModalOpen] = useState(false); // State to manage the visibility of quantity modal
+  const [quantity, setQuantity] = useState(1); // State to store quantity value
 
   // Fetch the initial product
   useEffect(() => {
@@ -52,13 +54,25 @@ const SwipeProducts = () => {
     handleSwipe(direction);
   };
 
+  const openQuantityModal = () => {
+    setQuantityModalOpen(true); // Open the quantity modal when Add to Cart is clicked
+  };
+
+  const closeQuantityModal = () => {
+    setQuantityModalOpen(false); // Close the modal when the user is done
+  };
+
+  const handleQuantityChange = (e) => {
+    setQuantity(e.target.value); // Update the quantity value
+  };
+
   const handleAddToCart = async () => {
-    if (!currentProduct) return;
+    if (!currentProduct || quantity < 1) return;
 
     try {
       const response = await axios.post(
         `${BASE_URL}/api/cart/add`,
-        { productId: currentProduct.id },
+        { productId: currentProduct.id, quantity: quantity },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -66,6 +80,7 @@ const SwipeProducts = () => {
         }
       );
       alert(response.data.message);
+      closeQuantityModal(); // Close the modal after adding the product to the cart
     } catch (error) {
       console.error("Error adding product to cart:", error);
       alert(error.response?.data?.message || "Failed to add product to cart");
@@ -101,10 +116,34 @@ const SwipeProducts = () => {
         <div className="swipe-buttons">
           <button onClick={() => swipeManually("left")}>Swipe Left</button>
           <button onClick={() => swipeManually("right")}>Swipe Right</button>
-          <button onClick={handleAddToCart} className="add-to-cart-button">
+          <button onClick={openQuantityModal} className="add-to-cart-button">
             Add to Cart
           </button>
         </div>
+
+        {/* Popup Modal for Quantity Input */}
+        {quantityModalOpen && (
+          <div className="quantity-modal-overlay">
+            <div className="quantity-modal">
+              <h3>Select Quantity</h3>
+              <input
+                type="number"
+                value={quantity}
+                onChange={handleQuantityChange}
+                min="1"
+                className="quantity-input"
+              />
+              <div className="modal-buttons">
+                <button onClick={handleAddToCart} className="confirm-add-to-cart">
+                  Add to Cart
+                </button>
+                <button onClick={closeQuantityModal} className="cancel-modal">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <button onClick={handleMoreDetails} className="modal-close-button">
           More Details
