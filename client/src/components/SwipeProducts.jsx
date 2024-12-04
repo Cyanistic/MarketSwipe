@@ -111,8 +111,8 @@ const SwipeProducts = () => {
         </button>
 
         <div className="center-buttons">
-          <Link to="/likes">
-            <button className="centerButton">LikeList</button>
+          <Link to="/add-product">
+            <button className="centerButton">Create Product</button>
           </Link>
 
           <Link to="/history">

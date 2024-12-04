@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BASE_URL } from '../App';
+import useFileAttachment from '../components/FileUploads';
 
-const LikeList = () => {
+const AddProduct = () => {
   const [productData, setProductData] = useState({
     name: '',
     price: '',
@@ -12,7 +13,6 @@ const LikeList = () => {
   const [categories, setCategories] = useState([]); // List of categories from the backend
   const [customCategory, setCustomCategory] = useState({
     name: '',
-    description: '',
   }); // For creating a new category
 
   // Fetch categories from the backend on component mount
@@ -76,7 +76,7 @@ const LikeList = () => {
       const newCategory = response.data.category; // Assuming backend returns the created category
       setCategories([...categories, newCategory]); // Add the new category to the dropdown
       setProductData({ ...productData, category: newCategory.id }); // Set the newly created category
-      setCustomCategory({ name: '', description: '' }); // Clear the custom category input
+      setCustomCategory({ name: ''}); // Clear the custom category input
     } catch (error) {
       console.error('Error creating category:', error.response?.data || error.message);
     }
@@ -87,7 +87,7 @@ const LikeList = () => {
     const productPayload = {
       name: productData.name,
       price: parseFloat(productData.price),
-      categoryId: productData.category, // Ensure category is the ID
+      categoryId: productData.category,
       tags: productData.tags.split(',').map((tag) => tag.trim()),
     };
 
@@ -161,13 +161,6 @@ const LikeList = () => {
             onChange={handleCustomCategoryChange}
             placeholder="Custom Category Name"
           />
-          <input
-            type="text"
-            name="description"
-            value={customCategory.description}
-            onChange={handleCustomCategoryChange}
-            placeholder="Custom Category Description"
-          />
           <button type="button" onClick={handleCreateCategory}>
             Add Category
           </button>
@@ -188,4 +181,4 @@ const LikeList = () => {
   );
 };
 
-export default LikeList;
+export default AddProduct;

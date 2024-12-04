@@ -6,7 +6,7 @@ import CreateUser from './pages/CreateUser';
 import Shopping from './pages/Shopping';
 import Cart from './pages/Cart';
 import HistoryPage from './pages/HistoryPage';
-import LikeListPage from './pages/LikeListPage';
+import AddProductPage from './pages/Add-ProductPage';
 
 export const BASE_URL = import.meta.env.DEV ? "http://localhost:5000" : "";
 
@@ -35,7 +35,7 @@ const App = () => {
       path: "/add-product",
       element: (
         <div className="fullPage">
-          <LikeListPage />
+          <AddProductPage />
         </div>
       ),
     },
@@ -46,22 +46,13 @@ const App = () => {
         <div className="fullPage">
           <Shopping />
 
-          <Link to="/likes">
+          <Link to="/add-product">
             <button className="centerButton">Create Product</button>
           </Link>
 
           <Link to="/history">
             <button className="centerButton">History</button>
           </Link>
-        </div>
-      ),
-    },
-
-    {
-      path: "/likes",
-      element: (
-        <div className="fullPage">
-          <LikeListPage />
         </div>
       ),
     },
