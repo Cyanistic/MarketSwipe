@@ -7,15 +7,15 @@ import "./SwipeProducts.css";
 import { BASE_URL } from "../App";
 
 const SwipeProducts = () => {
-  const [currentProduct, setCurrentProduct] = useState(null);  // Track the current product
+  const [currentProduct, setCurrentProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Fetch the initial product from the backend
+  // Fetch the initial product
   useEffect(() => {
     const fetchFirstProduct = async () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/products`);
-        setCurrentProduct(response.data[0]);  // Set the first product
+        setCurrentProduct(response.data[0]);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -23,7 +23,6 @@ const SwipeProducts = () => {
     fetchFirstProduct();
   }, []);
 
-  // Handle the swipe action
   const handleSwipe = (direction) => {
     if (currentProduct) {
       axios
@@ -35,13 +34,13 @@ const SwipeProducts = () => {
           },
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem('token')}`,  // Include JWT token
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
           }
         )
         .then((response) => {
           const recommendedProduct = response.data;
-          setCurrentProduct(recommendedProduct);  // Update to the recommended product
+          setCurrentProduct(recommendedProduct);
         })
         .catch((error) => {
           console.error("Error recording swipe:", error);
@@ -53,7 +52,26 @@ const SwipeProducts = () => {
     handleSwipe(direction);
   };
 
-  // Modal controls
+  const handleAddToCart = async () => {
+    if (!currentProduct) return;
+
+    try {
+      const response = await axios.post(
+        `${BASE_URL}/api/cart/add`,
+        { product_id: currentProduct.id },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+      alert(response.data.message);
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      alert(error.response?.data?.message || "Failed to add product to cart");
+    }
+  };
+
   const handleMoreDetails = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
@@ -67,6 +85,7 @@ const SwipeProducts = () => {
         <TinderCard
           key={currentProduct?.id}
           onSwipe={handleSwipe}
+          className="swipe-card"
           preventSwipe={["up", "down"]}
         >
           <div>
@@ -82,6 +101,9 @@ const SwipeProducts = () => {
         <div className="swipe-buttons">
           <button onClick={() => swipeManually("left")}>Swipe Left</button>
           <button onClick={() => swipeManually("right")}>Swipe Right</button>
+          <button onClick={handleAddToCart} className="add-to-cart-button">
+            Add to Cart
+          </button>
         </div>
 
         <button onClick={handleMoreDetails} className="modal-close-button">

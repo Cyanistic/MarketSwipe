@@ -41,7 +41,6 @@
 > 3. Install Dependencies
 > ```
 > npm install
-> npm install react-router-dom
 > ```
 > Once all information is installed you can move on to the [running](#running) section
 

@@ -1,0 +1,57 @@
+/* General Cart Container */
+.cart-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #f9f9f9; /* Light gray background */
+    border: 1px solid #ddd; /* Subtle border */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+    font-family: Arial, sans-serif; /* Clean font */
+    color: #333; /* Dark text color for readability */
+  }
+  
+  /* Heading Style */
+  .cart-title {
+    text-align: center;
+    color: #444;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  /* Message for Empty Cart */
+  .cart-empty-message {
+    text-align: center;
+    font-size: 18px;
+    color: #777;
+  }
+  
+  /* Cart Item List */
+  .cart-item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Individual Cart Items */
+  .cart-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd; /* Divider between items */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  /* Highlight Product IDs */
+  .cart-item-id {
+    font-weight: bold;
+    color: #007bff; /* Blue color for emphasis */
+  }
+  
+  /* Last Item Without Border */
+  .cart-item:last-child {
+    border-bottom: none;
+  }
+  
