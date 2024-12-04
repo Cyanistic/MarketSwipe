@@ -1,44 +1,32 @@
-body {
-  margin: 0;
-  height: 100vh;
+.modal-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  background-color: #f5d7b5; /* Your beige background color */
+  padding: 20px;
+  width: 400px;
+  height: 300px;
+  margin: auto;
+  border-radius: 10px;
+  text-align: center;
 }
 
-.products-container, .swipe-container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    max-width: 400px; /* Optional, for Tinder card size */
-  }
-  
-  .ReactModal__Content {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    width: 400px;
-    height: 300px;
-    margin: auto;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    background-color: white;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .ReactModal__Content button {
-    margin-top: auto;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  
+.modal-container img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.modal-close-button {
+  margin-top: auto;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.modal-close-button:hover {
+  background-color: #0056b3;
+}
