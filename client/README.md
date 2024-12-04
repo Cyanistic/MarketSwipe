@@ -5,22 +5,13 @@
 <summary>MacOS/Linux</summary>
 
 > 
-> 1. Create a Virtual Environment
-> ```
-> fnm env | Out-String | Invoke-Expression
-> ``` 
-> 2. Navigate to Project's Front-end Folder
+> 1. Navigate to Project's Front-end Folder
 > ```
 > cd client
 > ``` 
-> 3. Install Dependencies
+> 2. Install Dependencies
 > ```
 > npm install
-> npm install react-router-dom
-> npm install axios
-> npm install react-tinder-card
-> npm install @react-spring/web
-> npm install react-modal
 > ```
 > Once all information is installed you can move on to the [running](#running) section
 
@@ -52,14 +43,13 @@
 <summary>macOS/Linux</summary>
 
 > 
-> 1. Activate Your Local Host
+> 1. Start up the server on `http://localhost:5173/`
 > ```
 > npm run dev
 > ``` 
-> 2. (Optional) Stop Local Host
+> 2. (Optional) Stop the server
 > ```
 > Ctrl + C
-> Type "Y" at Stop Batch Prompt
 > ```
 
 </details>
@@ -81,4 +71,4 @@
 </details>  
 
 ## Troubleshooting
-If you get an error when attempting to run `npm run dev`, you are most likely missing dependencies. To resolve delete the `.vite\deps` folder under the `node_modules` folder, and run again the commands in steps 1-3 of the Initial Setup section.
+If you get an error when attempting to run `npm run dev`, you are most likely missing dependencies. To resolve rerun `npm install`.
