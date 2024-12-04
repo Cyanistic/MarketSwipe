@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import './AuthForm.css';
+import { BASE_URL } from '../App';
 
 const NewAuthForm = () => {
   const [email, setEmail] = useState('');
@@ -25,7 +26,7 @@ const NewAuthForm = () => {
     }
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/auth/register', { email, password });
+      const response = await axios.post(`${BASE_URL}/api/auth/register`, { email, password });
       if (response.status === 201) {
         alert('User successfully created!');
         navigate('/login');

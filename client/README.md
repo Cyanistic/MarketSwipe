@@ -17,6 +17,10 @@
 > ```
 > npm install
 > npm install react-router-dom
+> npm install axios
+> npm install react-tinder-card
+> npm install @react-spring/web
+> npm install react-modal
 > ```
 > Once all information is installed you can move on to the [running](#running) section
 

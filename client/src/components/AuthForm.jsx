@@ -22,14 +22,13 @@ const AuthForm = () => {
         // On successful login, store the JWT token in localStorage
         const token = response.headers['authorization']; // Get token from response header
         if (token) {
-          localStorage.setItem('token', token.replace('Bearer ', '')); // Store token without "Bearer"
+          localStorage.setItem('token', token.replace('Bearer ', ''));
         }
-
-        // Redirect to shopping page
-        navigate('/shopping');
+        
+        navigate('/shopping', { state: { userId: response.data.id, email: response.data.email } });
       }
     } catch (err) {
-      // Handle errors gracefully
+      // Handle errors
       setError(err.response?.data?.message || 'Invalid credentials or something went wrong!');
     }
   };
