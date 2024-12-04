@@ -7,89 +7,75 @@ import "./SwipeProducts.css";
 import { BASE_URL } from "../App";
 
 const SwipeProducts = () => {
-  const [products, setProducts] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentProduct, setCurrentProduct] = useState(null);  // Track the current product
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [likedTags, setLikedTags] = useState([]);
-  const [swipeDirection, setSwipeDirection] = useState("");
 
-  // Fetch products from the backend
+  // Fetch the initial product from the backend
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchFirstProduct = async () => {
       try {
-        const response = await axios.get(`/products`);
-        setProducts(response.data);
+        const response = await axios.get(`${BASE_URL}/api/products`);
+        setCurrentProduct(response.data[0]);  // Set the first product
       } catch (error) {
         console.error("Error fetching products:", error);
       }
     };
-    fetchProducts();
+    fetchFirstProduct();
   }, []);
 
-  // Filter products based on liked tags
-  const filterProductsByTags = () => {
-    if (likedTags.length === 0) return products;
-    return products.filter((product) =>
-      product.tags.some((tag) => likedTags.includes(tag))
-    );
-  };
-
-  // Update current index and handle liking a product
-  const updateIndex = (direction) => {
-    const likedProduct = products[currentIndex];
-    if (direction === "right") {
-      setLikedTags((prevTags) => [
-        ...new Set([...prevTags, ...likedProduct.tags]),
-      ]);
-    }
-
-    // Increment currentIndex
-    setCurrentIndex((prevIndex) => {
-      if (prevIndex < products.length - 1) {
-        return prevIndex + 1;
-      } else {
-        console.log("No more products!");
-        return prevIndex; // No more products to show
-      }
-    });
-  };
-
+  // Handle the swipe action
   const handleSwipe = (direction) => {
-    setSwipeDirection(direction);
-    updateIndex(direction);
+    if (currentProduct) {
+      axios
+        .post(
+          `${BASE_URL}/api/products/swipe`,
+          {
+            product_id: currentProduct.id,
+            liked: direction === "right",
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,  // Include JWT token
+            },
+          }
+        )
+        .then((response) => {
+          const recommendedProduct = response.data;
+          setCurrentProduct(recommendedProduct);  // Update to the recommended product
+        })
+        .catch((error) => {
+          console.error("Error recording swipe:", error);
+        });
+    }
   };
 
   const swipeManually = (direction) => {
-    setSwipeDirection(direction);
-    updateIndex(direction);
+    handleSwipe(direction);
   };
 
   // Modal controls
   const handleMoreDetails = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const filteredProducts = filterProductsByTags();
-
-  if (currentIndex >= filteredProducts.length) {
-    return <p className="swipe-container">No more products to show!</p>;
+  if (!currentProduct) {
+    return <p className="swipe-container">Loading products...</p>;
   }
 
   return (
     <div className="swipe-products">
       <div className="swipe-container">
         <TinderCard
-          key={filteredProducts[currentIndex]?.id}
+          key={currentProduct?.id}
           onSwipe={handleSwipe}
-          className="swipe-card"
           preventSwipe={["up", "down"]}
         >
           <div>
-            <h3>{filteredProducts[currentIndex]?.name}</h3>
+            <h3>{currentProduct?.name}</h3>
             <img
-              src={filteredProducts[currentIndex]?.uploads?.[0]?.url || ""}
-              alt={filteredProducts[currentIndex]?.name}
+              src={currentProduct?.uploads?.[0]?.url || ""}
+              alt={currentProduct?.name}
             />
-            <p>{filteredProducts[currentIndex]?.description}</p>
+            <p>{currentProduct?.description}</p>
           </div>
         </TinderCard>
 
@@ -115,7 +101,7 @@ const SwipeProducts = () => {
         <ProductModal
           isOpen={isModalOpen}
           closeModal={closeModal}
-          product={filteredProducts[currentIndex]}
+          product={currentProduct}
         />
       </div>
     </div>

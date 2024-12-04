@@ -1,0 +1,20 @@
+/* Position the cart link in the top-right corner */
+.cart-link {
+  position: absolute;
+  top: 20px;    /* Adjust this value to move it down or up */
+  right: 20px;  /* Position it on the right side */
+  z-index: 100; /* Ensure it stays above other content */
+  text-align: center; /* Center the text below the image */
+}
+
+.cart-image {
+  width: 60px;  /* Adjust the size of the cart image */
+  height: 60px; /* Adjust the size of the cart image */
+}
+
+.cart-text {
+  display: block; /* Make the text appear on a new line below the image */
+  font-size: 12px; /* Adjust the font size */
+  margin-top: 5px; /* Add some space between the image and the text */
+  color: #333; /* Adjust the text color */
+}

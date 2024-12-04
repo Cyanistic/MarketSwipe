@@ -4,6 +4,7 @@ import { useRoutes, Link } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import CreateUser from './pages/CreateUser';
 import Shopping from './pages/Shopping';
+import Cart from './pages/Cart';
 import HistoryPage from './pages/HistoryPage';
 import LikeListPage from './pages/LikeListPage';
 
@@ -12,6 +13,14 @@ export const BASE_URL = import.meta.env.DEV ? "http://localhost:5000" : "";
 const App = () => {
   // Sets up routes
   let element = useRoutes([
+    {
+      path: "/cart",
+      element: (
+        <div className="fullPage">
+          <Cart />
+        </div>
+      ),
+    },
 
     {
       path: "/history",
