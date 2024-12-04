@@ -54,4 +54,19 @@
   .cart-item:last-child {
     border-bottom: none;
   }
+
+  .remove-product-button {
+    background-color: #f44336; /* Red background */
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .remove-product-button:hover {
+    background-color: #e53935;
+  }
+  
   
