@@ -175,3 +175,17 @@ button:hover {
 .modal-buttons button {
   margin-right: 10px;
 }
+
+.product-images {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.product-image {
+  max-width: 300px;
+  max-height: 300px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}

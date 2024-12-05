@@ -120,8 +120,8 @@ const AddProduct = () => {
       name: productData.name,
       price: parseFloat(productData.price),
       categoryId: productData.category,
-      tag_names: productData.tags.split(",").map((tag) => tag.trim()),
-      upload_ids: productData.uploadIds,
+      tags: productData.tags.split(",").map((tag) => tag.trim()),
+      uploads: productData.uploadIds,
     };
 
     const token = localStorage.getItem("token");

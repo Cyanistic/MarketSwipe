@@ -28,26 +28,8 @@ const SwipeProducts = () => {
 
   // Fetch images for the current product
   const fetchProductImages = async (imageIds) => {
-    try {
-
-      const promises = imageIds.map((id) =>
-        axios.get(`${BASE_URL}/api/products/${id}/uploads`, {
-          responseType: "blob",
-        })
-      );
-
-      const imageResponses = await Promise.all(promises);
-      console.log(imageResponses)
-      const imageURLs = imageResponses.map((res) => URL.createObjectURL(res.data));
-
-      setImages(imageURLs); 
-
-    } catch (error) {
-      console.error("Error fetching product images:", error);
-
-    }
-  
-
+      console.log(imageIds)
+      setImages(imageIds); 
   };
 
   const handleSwipe = (direction) => {
@@ -178,10 +160,10 @@ const SwipeProducts = () => {
 
             <div className="product-images">
               {images.length > 0 ? (
-                images.map((imageURL, index) => (
+                images.map((image, index) => (
                   <img
                     key={index}
-                    src={imageURL}
+                    src={`${BASE_URL}/api/upload/${image.path}`}
                     alt={`Product Image ${index + 1}`}
                     className="product-image"
                   />

@@ -146,8 +146,8 @@ def create_product():
         JSON response with a success message and the updated product.
     """
     data = CreateProductSchema().load(request.get_json())
-    tag_names = data.get("tag_names", None)
-    upload_ids = data.get("upload_ids", None)
+    tag_names = data.get("tags", None)
+    upload_ids = data.get("uploads", None)
 
     product = Product(
         name=data["name"],
