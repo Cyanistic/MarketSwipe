@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 
 from cart import CartProduct
+from products import ProductSchema
 
 
 orders_bp = Blueprint("orders", __name__, url_prefix="/orders")
@@ -50,11 +51,11 @@ class Payment(db.Model):
 
 
 class OrderSchema(SQLAlchemyAutoCamelCaseSchema):
+    items = ma.Nested(ProductSchema, many=True)
+
     class Meta:
         model = Order
         include_fk = True
-        include_relationships = True
-        load_instance = True
 
 
 @orders_bp.route("/", methods=["GET"])
