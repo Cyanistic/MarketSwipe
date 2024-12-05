@@ -26,37 +26,39 @@ export default function useFileAttachment() {
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
+  
     const reader = new FileReader();
-    reader.onloadend = async () => {
-      const base64Data = reader.result.split(",")[1]; // Extract base64 string
-      try {
-        setLoading(true);
-        setError(null);
 
+    reader.onloadend = async () => {
+      const base64Data = reader.result; // Entire Base64 string with MIME type
+      console.log("Base64 Data Sent:", base64Data);
+  
+      try {
+        const token = localStorage.getItem("token");
         const response = await axios.post(
-          `${BASE_URL}/api/uploads/`,
-          { file_data: base64Data },
+          `${BASE_URL}/api/upload/`,
+          {
+            name: file.name,
+            fileData: base64Data, // full Base64 string
+          },
           {
             headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
+              Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
-
-        setAttachment(response.data.upload); // Save uploaded file metadata
+  
         console.log("Upload successful:", response.data);
-      } catch (err) {
-        console.error("Error uploading file:", err.response?.data || err.message);
-        setError("Failed to upload file");
-      } finally {
-        setLoading(false);
+        setAttachment(response.data.upload); // Save uploaded file metadata
+      } catch (error) {
+        console.error("Error uploading file:", error.response?.data || error.message);
       }
     };
-
-    reader.readAsDataURL(file); // Convert file to base64
+  
+    reader.readAsDataURL(file); // Read file as Base64 with MIME type
   };
+  
 
   const hiddenFileInput = () => (
     <input

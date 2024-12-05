@@ -1,25 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { BASE_URL } from '../App';
-import useFileAttachment from '../components/FileUploads';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { BASE_URL } from "../App";
+import useFileAttachment from "../components/FileUploads";
 
 const AddProduct = () => {
   const [productData, setProductData] = useState({
-    name: '',
-    price: '',
-    category: '',
-    tags: '',
+    name: "",
+    price: "",
+    category: "",
+    tags: "",
+    uploadIds:[],
   });
   const [categories, setCategories] = useState([]); // List of categories from the backend
   const [customCategory, setCustomCategory] = useState({
-    name: '',
+    name: "",
   }); // For creating a new category
+
+  const { attachment, loading, error, handleFileUploadClick, resetFile, hiddenFileInput } =
+    useFileAttachment();
 
   // Fetch categories from the backend on component mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         const response = await axios.get(`${BASE_URL}/api/products/categories`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -27,7 +31,7 @@ const AddProduct = () => {
         });
         setCategories(response.data); // Assuming the server responds with a list of categories
       } catch (error) {
-        console.error('Error fetching categories:', error.response?.data || error.message);
+        console.error("Error fetching categories:", error.response?.data || error.message);
       }
     };
 
@@ -53,22 +57,21 @@ const AddProduct = () => {
   // Handle adding a new category
   const handleCreateCategory = async () => {
     if (!customCategory.name.trim()) {
-      alert('Category name cannot be empty.');
+      alert("Category name cannot be empty.");
       return;
     }
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await axios.post(
         `${BASE_URL}/api/products/categories`,
         {
           name: customCategory.name,
-          description: customCategory.description, // Include description in the payload
         },
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
@@ -76,10 +79,39 @@ const AddProduct = () => {
       const newCategory = response.data.category; // Assuming backend returns the created category
       setCategories([...categories, newCategory]); // Add the new category to the dropdown
       setProductData({ ...productData, category: newCategory.id }); // Set the newly created category
-      setCustomCategory({ name: ''}); // Clear the custom category input
+      setCustomCategory({ name: "" }); // Clear the custom category input
     } catch (error) {
-      console.error('Error creating category:', error.response?.data || error.message);
+      console.error("Error creating category:", error.response?.data || error.message);
     }
+  };
+
+  const handleFileUpload = async () => {
+    if (!attachment) {
+      alert("Please upload a file first.");
+      return;
+    }
+
+    try {
+      const uploadedImage = attachment;
+
+      setProductData((prevData) => ({
+        ...prevData,
+        uploadIds: [...prevData.uploadIds, uploadedImage.id],
+      }));
+
+      if (productData.uploadIds.length) {
+        console.log(productData);
+        alert("Image saved!")
+      } else {
+        alert("Please press save again");
+        return;
+      }
+
+      console.log("Image uploaded successfully:", uploadedImage);
+    } catch (error) {
+      console.error("Error uploading image:", error.response?.data || error.message);
+    }
+
   };
 
   const handleSubmit = async (e) => {
@@ -88,10 +120,11 @@ const AddProduct = () => {
       name: productData.name,
       price: parseFloat(productData.price),
       categoryId: productData.category,
-      tags: productData.tags.split(',').map((tag) => tag.trim()),
+      tags: productData.tags.split(",").map((tag) => tag.trim()),
+      uploads: productData.uploadIds,
     };
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
 
     try {
       const response = await axios.post(
@@ -100,13 +133,13 @@ const AddProduct = () => {
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
         }
       );
-      console.log('Product created successfully:', response.data);
+      console.log("Product created successfully:", response.data);
     } catch (error) {
-      console.error('Error creating product:', error.response?.data || error.message);
+      console.error("Error creating product:", error.response?.data || error.message);
     }
   };
 
@@ -175,6 +208,18 @@ const AddProduct = () => {
           onChange={handleChange}
           placeholder="Tags"
         />
+      </div>
+      <div>
+        <label>Upload Product Image:</label>
+        <button type="button" onClick={handleFileUploadClick}>
+          {loading ? "Uploading..." : "Upload File"}
+        </button>
+        {hiddenFileInput()}
+        {attachment && <p>File Uploaded: {attachment.path}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <button type="button" onClick={handleFileUpload}>
+          Save Image
+        </button>
       </div>
       <button type="submit">Create Product</button>
     </form>
