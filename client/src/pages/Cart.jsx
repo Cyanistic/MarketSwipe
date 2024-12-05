@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Cart.css";
 import { BASE_URL } from "../App";
-import { Link } from 'react-router-dom';  // Import Link from react-router-dom
+import { useNavigate, Link } from "react-router-dom";
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [productDetails, setProductDetails] = useState({});
+  const navigate = useNavigate();
 
-  // Fetch cart items on component mount
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -18,7 +18,6 @@ const Cart = () => {
           },
         });
         setCartItems(response.data);
-        // Fetch product details for each product in the cart
         fetchProductDetails(response.data);
       } catch (error) {
         console.error("Error fetching cart items:", error);
@@ -29,23 +28,25 @@ const Cart = () => {
       const details = {};
       for (const item of cartItems) {
         try {
-          const response = await axios.get(`${BASE_URL}/api/products/${item.product}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-          });
-          details[item.product] = response.data; // Store product details
+          const response = await axios.get(
+            `${BASE_URL}/api/products/${item.product}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          details[item.product] = response.data;
         } catch (error) {
           console.error(`Error fetching details for product ${item.product}:`, error);
         }
       }
-      setProductDetails(details); // Update the product details in the state
+      setProductDetails(details);
     };
 
     fetchCart();
   }, []);
 
-  // Remove product from cart
   const removeProductFromCart = async (productId) => {
     try {
       const response = await axios.post(
@@ -57,8 +58,7 @@ const Cart = () => {
           },
         }
       );
-      alert(response.data.message); // Show success message
-      // Re-fetch cart items after removing the product
+      alert(response.data.message);
       setCartItems(cartItems.filter((item) => item.product !== productId));
     } catch (error) {
       console.error("Error removing product from cart:", error);
@@ -76,8 +76,12 @@ const Cart = () => {
     }, 0);
   };
 
-  return (
+  const handlePayment = () => {
+    const total = getTotalPrice();
+    navigate("/payment", { state: { total } });
+  };
 
+  return (
     <div className="cart-container">
       <Link to="/shopping" className="back-link">
         <img
@@ -86,7 +90,6 @@ const Cart = () => {
           className="back-image"
         />
       </Link>
-
       <h2 className="cart-title">Your Cart</h2>
       {cartItems.length === 0 ? (
         <p className="cart-empty-message">No items in cart.</p>
@@ -94,14 +97,13 @@ const Cart = () => {
         <ul className="cart-item-list">
           {cartItems.map((item) => {
             const product = productDetails[item.product];
-            if (!product) return null; // Skip if product details are not loaded yet
+            if (!product) return null;
 
             return (
               <li key={item.product} className="cart-item">
                 <span className="cart-item-name">{product.name}</span>
                 <span className="cart-item-price">${product.price}</span>
                 <span className="cart-item-quantity">Quantity: {item.quantity}</span>
-                {/* Add Remove button next to each product */}
                 <button
                   onClick={() => removeProductFromCart(item.product)}
                   className="remove-product-button"
@@ -115,6 +117,11 @@ const Cart = () => {
       )}
       <div className="cart-total">
         <strong>Total: ${getTotalPrice().toFixed(2)}</strong>
+      </div>
+      <div className="process-payment-container">
+        <button onClick={handlePayment} className="process-payment-button">
+          Process Payment
+        </button>
       </div>
     </div>
   );

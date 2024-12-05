@@ -7,12 +7,23 @@ import Shopping from './pages/Shopping';
 import Cart from './pages/Cart';
 import HistoryPage from './pages/HistoryPage';
 import AddProductPage from './pages/Add-ProductPage';
+import Pay from './pages/Pay';
+
 
 export const BASE_URL = import.meta.env.DEV ? "http://localhost:5000" : "";
 
 const App = () => {
   // Sets up routes
   let element = useRoutes([
+    {
+      path: "/payment",
+      element: (
+        <div className="fullPage">
+          <Pay />
+        </div>
+      ),
+    },
+
     {
       path: "/cart",
       element: (
