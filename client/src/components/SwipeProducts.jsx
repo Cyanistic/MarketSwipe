@@ -11,10 +11,7 @@ const SwipeProducts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quantityModalOpen, setQuantityModalOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
-<<<<<<< HEAD
-=======
   const [images, setImages] = useState([]);
->>>>>>> diego
 
   // Fetch the initial product
   useEffect(() => {
@@ -60,15 +57,12 @@ const SwipeProducts = () => {
           } else {
             // Set the next product as the current product
             setCurrentProduct(nextProduct);
-<<<<<<< HEAD
-=======
             console.log(nextProduct)
             if (nextProduct?.uploads?.length) {
               fetchProductImages(nextProduct.uploads);
             } else {
               setImages([]); // Clear images if no image IDs
             }
->>>>>>> diego
           }
         })
         .catch((error) => {

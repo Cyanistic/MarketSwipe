@@ -1,6 +1,6 @@
 import React from "react";
 import Modal from "react-modal";
-import "./productModal.css";
+import "./ProductModal.css";
 
 const ProductModal = ({ isOpen, closeModal, product }) => {
   return (
