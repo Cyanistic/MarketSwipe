@@ -138,16 +138,16 @@ def create_product():
         "name": "Updated Product Name",
         "price": 150.0,
         "category_id": 2,
-        "tag_names": ["tag3", "tag4"],  # Pass an empty list to remove all tags
-        "upload_ids": [4, 5, 6]         # Pass an empty list to remove all uploads
+        "tags": ["tag3", "tag4"],  # Pass an empty list to remove all tags
+        "uploads": [4, 5, 6]         # Pass an empty list to remove all uploads
     }
 
     Returns:
         JSON response with a success message and the updated product.
     """
     data = CreateProductSchema().load(request.get_json())
-    tag_names = data.get("tag_names", None)
-    upload_ids = data.get("upload_ids", None)
+    tag_names = data.get("tags", None)
+    upload_ids = data.get("uploads", None)
 
     product = Product(
         name=data["name"],
@@ -224,13 +224,13 @@ def update_product(id):
         "price": 150.0,
         "category_id": 2,
         "tags": ["tag3", "tag4"],
-        "upload_ids": [4, 5, 6]
+        "uploads": [4, 5, 6]
     }
 
     Returns:
         JSON response with a success message and the updated product.
     """
-    data = request.get_json()
+    data = CreateProductSchema().load(request.get_json())
     tag_names = data.get("tags", [])
     uploads = data.get("uploads", [])
 
