@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "./Cart.css";
 import { BASE_URL } from "../App";
+import { Link } from 'react-router-dom';  // Import Link from react-router-dom
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -76,7 +77,16 @@ const Cart = () => {
   };
 
   return (
+
     <div className="cart-container">
+      <Link to="/shopping" className="back-link">
+        <img
+          src="back.png" // Replace with your image path
+          alt="Back arrow"
+          className="back-image"
+        />
+      </Link>
+
       <h2 className="cart-title">Your Cart</h2>
       {cartItems.length === 0 ? (
         <p className="cart-empty-message">No items in cart.</p>

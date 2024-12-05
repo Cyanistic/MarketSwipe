@@ -69,4 +69,16 @@
     background-color: #e53935;
   }
   
+  .back-link {
+    position: absolute;
+    top: 20px;   
+    left: 40px;  
+    z-index: 100; 
+    text-align: center; 
+  }
+  
+  .back-image {
+    width: 25px;  
+    height: 25px; 
+  }
   
