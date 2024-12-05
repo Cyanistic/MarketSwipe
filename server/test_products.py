@@ -52,11 +52,18 @@ def test_get_product(test_client):
     assert response.status_code == 200
     assert response.json["name"] == product.name
 
+
+def test_create_tag(test_client):
+    response = test_client.post("/api/products/tags", json={"name": "New Tag"})
+    assert response.status_code == 201
+    assert response.json["message"] == "Tag created successfully"
+    assert response.json["tag"]["name"] == "New Tag"
+
 def test_update_product(test_client, access_token):
     product = Product.query.first()
     response = test_client.put(
         f"/api/products/{product.id}",
-        json={"name": "Updated Laptop", "price": 1099.99},
+        json={"name": "Updated Laptop", "price": 1099.99, "tags": ["New Tag"]},
         headers={"Authorization": f"Bearer {access_token}"},
     )
     assert response.status_code == 200
@@ -91,9 +98,3 @@ def test_delete_category(test_client):
     response = test_client.delete(f"/api/products/categories/{category.id}")
     assert response.status_code == 200
     assert response.json["message"] == "Category deleted successfully"
-
-def test_create_tag(test_client):
-    response = test_client.post("/api/products/tags", json={"name": "New Tag"})
-    assert response.status_code == 201
-    assert response.json["message"] == "Tag created successfully"
-    assert response.json["tag"]["name"] == "New Tag"
