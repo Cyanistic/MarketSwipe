@@ -1,7 +1,7 @@
 from flask_jwt_extended import current_user, jwt_manager
 from flask_jwt_extended.view_decorators import jwt_required
 from marshmallow.fields import Nested
-from app import SQLAlchemyAutoCamelCaseSchema, db, ma
+from app import CamelCaseSchema, SQLAlchemyAutoCamelCaseSchema, db, ma
 from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request
 
@@ -16,7 +16,6 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     user = db.relationship("User", backref="order")
-    items = db.relationship("Product", secondary="order_item", backref="order")
     total = db.Column(db.Numeric(10, 2), nullable=False)
     status = db.Column(db.String(20), default="pending")
     created_at = db.Column(
@@ -31,6 +30,8 @@ class OrderItem(db.Model):
     product_id = db.Column(
         db.Integer, db.ForeignKey("product.id"), nullable=False, primary_key=True
     )
+    order = db.relationship("Order", backref="items")
+    product = db.relationship("Product", backref="orders")
     quantity = db.Column(db.Integer, nullable=False, default=1)
 
 
@@ -49,9 +50,13 @@ class Payment(db.Model):
         db.DateTime, nullable=False, default=datetime.now(timezone.utc)
     )
 
+class OrderItemSchema(CamelCaseSchema):
+    product = ma.Nested(ProductSchema)
+    quantity = ma.Integer()
+
 
 class OrderSchema(SQLAlchemyAutoCamelCaseSchema):
-    items = ma.Nested(ProductSchema, many=True)
+    items = ma.Nested(OrderItemSchema, many=True)
 
     class Meta:
         model = Order
@@ -69,6 +74,9 @@ def get_orders():
     """
     user_id = current_user.id
     orders = Order.query.filter_by(user_id=user_id).all()
+    for order in orders:
+        for item in order.items:
+            print(item.quantity)
     return jsonify(OrderSchema().dump(orders, many=True)), 200
 
 
