@@ -4,7 +4,6 @@ import { BASE_URL } from "../App";
 import "./HistoryPage.css";
 import { Link } from "react-router-dom";
 
-
 const HistoryPage = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -12,16 +11,13 @@ const HistoryPage = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      console.log("Fetching orders...");
       try {
         const response = await axios.get(`${BASE_URL}/api/orders/`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-
-        console.log("Orders fetched successfully:", response.data);
-        setOrders(response.data);  // Storing the orders in state
+        setOrders(response.data); // Orders now include product names due to ProductSchema nesting
       } catch (error) {
         console.error("Error fetching order history:", error);
         setError(error.response?.data?.message || "Failed to fetch orders");
@@ -37,7 +33,8 @@ const HistoryPage = () => {
 
   if (error) return <p className="error">{error}</p>;
 
-  if (orders.length === 0) return <p className="empty-message">You have no order history.</p>;
+  if (orders.length === 0)
+    return <p className="empty-message">You have no order history.</p>;
 
   return (
     <div className="history-container">
@@ -58,9 +55,10 @@ const HistoryPage = () => {
               <span>Status: {order.status}</span>
             </div>
             <ul className="order-products">
-              {order.items.map((productId, index) => (
+              {order.items.map((item, index) => (
                 <li key={index} className="product-item">
-                  <span>Product ID: {productId}</span>
+                  <span>Product: {item.name}</span> {/* Display product name */}
+                  <span>Price: ${item.price}</span> {/* Display quantity */}
                 </li>
               ))}
             </ul>
@@ -68,12 +66,7 @@ const HistoryPage = () => {
           </li>
         ))}
       </ul>
-
-      <div className="contact-support">
-          <Link to="/support" className="contact-support-link">Contact Support</Link>
-      </div>
     </div>
-    
   );
 };
 
