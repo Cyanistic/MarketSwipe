@@ -125,6 +125,16 @@ class CreateProductSchema(CamelCaseSchema):
     class Meta:
         unknown = EXCLUDE
 
+class UpdateProductSchema(CamelCaseSchema):
+    name = fields.String()
+    price = fields.Float()
+    category_id = fields.Integer()
+    tags = fields.List(fields.String())
+    uploads = fields.List(fields.Integer())
+
+    class Meta:
+        unknown = EXCLUDE
+
 
 # CREATE Product
 @products_bp.route("/", methods=["POST"])
@@ -230,17 +240,21 @@ def update_product(id):
     Returns:
         JSON response with a success message and the updated product.
     """
-    data = CreateProductSchema().load(request.get_json())
-    tag_names = data.get("tags", [])
-    uploads = data.get("uploads", [])
-
     product = Product.query.get_or_404(id)
+
+    if not product.seller_id == current_user.id:
+        return jsonify({"message": "User is not allowed to update product"}), 403
+
+    data = UpdateProductSchema().load(request.get_json())
+    tag_names = data.get("tags", None)
+    uploads = data.get("uploads", None)
+
     product.name = data.get("name", product.name)
     product.price = data.get("price", product.price)
     product.category_id = data.get("category_id", product.category_id)
 
     # Update tags
-    if tag_names:
+    if tag_names is not None:
         tags = []
         for name in tag_names:
             tag = Tag.query.filter_by(name=name).first()
@@ -251,7 +265,7 @@ def update_product(id):
         product.tags = tags
 
     # Update uploads
-    if uploads:
+    if uploads is not None:
         uploads = Upload.query.filter(Upload.id.in_(uploads)).all()
         product.uploads = uploads
 
