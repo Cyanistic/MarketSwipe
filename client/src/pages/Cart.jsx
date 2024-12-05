@@ -85,7 +85,7 @@ const Cart = () => {
     <div className="cart-container">
       <Link to="/shopping" className="back-link">
         <img
-          src="back.png" // Replace with your image path
+          src="back.png"
           alt="Back arrow"
           className="back-image"
         />
@@ -111,6 +111,7 @@ const Cart = () => {
                   Remove
                 </button>
               </li>
+
             );
           })}
         </ul>
@@ -122,6 +123,10 @@ const Cart = () => {
         <button onClick={handlePayment} className="process-payment-button">
           Process Payment
         </button>
+      </div>
+
+      <div className="contact-support">
+        <Link to="/support" className="contact-support-link">Contact Support</Link>
       </div>
     </div>
   );

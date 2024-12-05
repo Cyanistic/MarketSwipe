@@ -8,6 +8,8 @@ import Cart from './pages/Cart';
 import HistoryPage from './pages/HistoryPage';
 import AddProductPage from './pages/Add-ProductPage';
 import Pay from './pages/Pay';
+import Support from './pages/Support';
+
 
 
 export const BASE_URL = import.meta.env.DEV ? "http://localhost:5000" : "";
@@ -15,6 +17,15 @@ export const BASE_URL = import.meta.env.DEV ? "http://localhost:5000" : "";
 const App = () => {
   // Sets up routes
   let element = useRoutes([
+    {
+      path: "/support",
+      element: (
+        <div className="fullPage">
+          <Support />
+        </div>
+      ),
+    },
+
     {
       path: "/payment",
       element: (
@@ -92,6 +103,11 @@ const App = () => {
           <Link to="/login">
             <button className="centerButton">Start Shopping Now!</button>
           </Link>
+
+
+          <div className="contact-support">
+            <Link to="/support" className="contact-support-link">Contact Support</Link>
+          </div>
         </div>
       ),
     },

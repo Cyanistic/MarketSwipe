@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link} from "react-router-dom";
 import axios from "axios";
 import "./Pay.css";
 import { BASE_URL } from "../App";
@@ -144,6 +144,10 @@ const Pay = () => {
           </button>
         </div>
       </form>
+
+      <div className="contact-support">
+            <Link to="/support" className="contact-support-link">Contact Support</Link>
+        </div>
     </div>
   );
 };
