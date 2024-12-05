@@ -11,6 +11,7 @@ const SwipeProducts = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [quantityModalOpen, setQuantityModalOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
+  const [images, setImages] = useState([]);
 
   // Fetch the initial product
   useEffect(() => {
@@ -24,6 +25,30 @@ const SwipeProducts = () => {
     };
     fetchFirstProduct();
   }, []);
+
+  // Fetch images for the current product
+  const fetchProductImages = async (imageIds) => {
+    try {
+
+      const promises = imageIds.map((id) =>
+        axios.get(`${BASE_URL}/api/products/${id}/uploads`, {
+          responseType: "blob",
+        })
+      );
+
+      const imageResponses = await Promise.all(promises);
+      console.log(imageResponses)
+      const imageURLs = imageResponses.map((res) => URL.createObjectURL(res.data));
+
+      setImages(imageURLs); 
+
+    } catch (error) {
+      console.error("Error fetching product images:", error);
+
+    }
+  
+
+  };
 
   const handleSwipe = (direction) => {
     if (currentProduct) {
@@ -50,6 +75,12 @@ const SwipeProducts = () => {
           } else {
             // Set the next product as the current product
             setCurrentProduct(nextProduct);
+            console.log(nextProduct)
+            if (nextProduct?.uploads?.length) {
+              fetchProductImages(nextProduct.uploads);
+            } else {
+              setImages([]); // Clear images if no image IDs
+            }
           }
         })
         .catch((error) => {
@@ -144,10 +175,22 @@ const SwipeProducts = () => {
         >
           <div>
             <h3>{currentProduct?.name}</h3>
-            <img
-              src={currentProduct?.uploads?.[0]?.url || ""}
-              alt={currentProduct?.name}
-            />
+
+            <div className="product-images">
+              {images.length > 0 ? (
+                images.map((imageURL, index) => (
+                  <img
+                    key={index}
+                    src={imageURL}
+                    alt={`Product Image ${index + 1}`}
+                    className="product-image"
+                  />
+                ))
+              ) : (
+                <p>No images available</p>
+              )}
+            </div>
+
             <p>{currentProduct?.description}</p>
           </div>
         </TinderCard>

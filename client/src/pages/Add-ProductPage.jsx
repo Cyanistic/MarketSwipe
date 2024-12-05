@@ -9,7 +9,7 @@ const AddProduct = () => {
     price: "",
     category: "",
     tags: "",
-    imageId: null, // To store the uploaded image ID
+    uploadIds:[],
   });
   const [categories, setCategories] = useState([]); // List of categories from the backend
   const [customCategory, setCustomCategory] = useState({
@@ -92,14 +92,26 @@ const AddProduct = () => {
     }
 
     try {
-      console.log(attachment)
+      const uploadedImage = attachment;
 
-      const uploadedImage = attachment; // Get the uploaded image metadata
-      setProductData({ ...productData, imageId: uploadedImage.id }); // Save the image ID to product data
+      setProductData((prevData) => ({
+        ...prevData,
+        uploadIds: [...prevData.uploadIds, uploadedImage.id],
+      }));
+
+      if (productData.uploadIds.length) {
+        console.log(productData);
+        alert("Image saved!")
+      } else {
+        alert("Please press save again");
+        return;
+      }
+
       console.log("Image uploaded successfully:", uploadedImage);
     } catch (error) {
       console.error("Error uploading image:", error.response?.data || error.message);
     }
+
   };
 
   const handleSubmit = async (e) => {
@@ -108,8 +120,8 @@ const AddProduct = () => {
       name: productData.name,
       price: parseFloat(productData.price),
       categoryId: productData.category,
-      tags: productData.tags.split(",").map((tag) => tag.trim()),
-      imageId: productData.imageId, // Attach the uploaded image ID
+      tag_names: productData.tags.split(",").map((tag) => tag.trim()),
+      upload_ids: productData.uploadIds,
     };
 
     const token = localStorage.getItem("token");
