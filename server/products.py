@@ -86,13 +86,6 @@ class SwipeHistory(db.Model):
 
 
 # Schemas for serialization/deserialization
-class ProductSchema(SQLAlchemyAutoCamelCaseSchema):
-    class Meta:
-        model = Product
-        include_fk = True
-        include_relationships = True
-
-
 class CategorySchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = Category
@@ -101,6 +94,15 @@ class CategorySchema(SQLAlchemyAutoCamelCaseSchema):
 class TagSchema(SQLAlchemyAutoCamelCaseSchema):
     class Meta:
         model = Tag
+
+
+class ProductSchema(SQLAlchemyAutoCamelCaseSchema):
+    tags = ma.Nested(TagSchema, many=True)
+    uploads = ma.Nested(UploadSchema, many=True)
+
+    class Meta:
+        model = Product
+        include_fk = True
 
 
 product_schema = ProductSchema()
@@ -164,7 +166,7 @@ def create_product():
                 db.session.add(tag)
             tags.append(tag)
         product.tags = tags
-    
+
     # Update uploads
     if upload_ids is not None:
         uploads = Upload.query.filter(Upload.id.in_(upload_ids)).all()
@@ -221,7 +223,7 @@ def update_product(id):
         "name": "Updated Product Name",
         "price": 150.0,
         "category_id": 2,
-        "tag_names": ["tag3", "tag4"],
+        "tags": ["tag3", "tag4"],
         "upload_ids": [4, 5, 6]
     }
 
@@ -310,6 +312,7 @@ def delete_category(id):
     db.session.commit()
     return jsonify({"message": "Category deleted successfully"}), 200
 
+
 # Get recommended products on given category
 @products_bp.route("/categories/<int:category_id>", methods=["GET"])
 def get_recommended_products(category_id):
@@ -324,7 +327,9 @@ def get_recommended_products(category_id):
         Response: A JSON response containing the recommended products.
     """
     data = request.get_json()
-    products = recommend(current_user.id, category_id, num_products=data.get("num_products", 3))
+    products = recommend(
+        current_user.id, category_id, num_products=data.get("num_products", 3)
+    )
     return jsonify(products_schema.dump(products)), 200
 
 
@@ -352,6 +357,7 @@ def get_tags():
     tags = Tag.query.all()
     return jsonify(tags_schema.dump(tags)), 200
 
+
 def recommend(user_id, category_id, num_products=1):
     """
     Recommend products to a user based on their swipe history within a specific category.
@@ -368,9 +374,7 @@ def recommend(user_id, category_id, num_products=1):
     user_swipe_history = (
         db.session.query(SwipeHistory)
         .join(Product, SwipeHistory.product_id == Product.id)
-        .filter(
-            SwipeHistory.user_id == user_id, Product.category_id == category_id
-        )
+        .filter(SwipeHistory.user_id == user_id, Product.category_id == category_id)
         .order_by(SwipeHistory.created_at.desc())
         .all()
     )
@@ -401,6 +405,7 @@ def recommend(user_id, category_id, num_products=1):
         return recommended_products
     else:
         return None
+
 
 @products_bp.route("/swipe", methods=["POST"])
 @jwt_required()
@@ -448,6 +453,7 @@ def record_swipe_and_recommend():
             ),
             200,
         )
+
 
 # Reset all swipe history for the current user
 @products_bp.route("/reset", methods=["POST"])
