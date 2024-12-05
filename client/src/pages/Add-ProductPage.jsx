@@ -92,21 +92,9 @@ const AddProduct = () => {
     }
 
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `${BASE_URL}/api/upload`,
-        {
-          file_data: attachment.fileData, // Send the base64 data of the uploaded file
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      console.log(attachment)
 
-      const uploadedImage = response.data.upload; // Get the uploaded image metadata
+      const uploadedImage = attachment; // Get the uploaded image metadata
       setProductData({ ...productData, imageId: uploadedImage.id }); // Save the image ID to product data
       console.log("Image uploaded successfully:", uploadedImage);
     } catch (error) {
