@@ -17,7 +17,7 @@ const HistoryPage = () => {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
         });
-        setOrders(response.data); // Orders now include product names due to ProductSchema nesting
+        setOrders(response.data); 
       } catch (error) {
         console.error("Error fetching order history:", error);
         setError(error.response?.data?.message || "Failed to fetch orders");
@@ -39,30 +39,37 @@ const HistoryPage = () => {
   return (
     <div className="history-container">
       <Link to="/shopping" className="back-link">
-        <img
-          src="back.png"
-          alt="Back arrow"
-          className="back-image"
-        />
+        <img src="back.png" alt="Back arrow" className="back-image" />
       </Link>
       <h2>Your Order History</h2>
       <ul className="order-list">
         {orders.map((order) => (
           <li key={order.id} className="order-item">
             <div className="order-header">
-              <span>Order ID: {order.id}</span>
-              <span>Date: {new Date(order.createdAt).toLocaleDateString()}</span>
-              <span>Status: {order.status}</span>
+              <span className="order-id">Order ID: {order.id}</span>
+              <span className="order-date">
+                Date: {new Date(order.createdAt).toLocaleDateString()}
+              </span>
+              <span className="order-status">Status: {order.status}</span>
             </div>
             <ul className="order-products">
               {order.items.map((item, index) => (
                 <li key={index} className="product-item">
-                  <span>Product: {item.name}</span> {/* Display product name */}
-                  <span>Price: ${item.price}</span> {/* Display quantity */}
+                  <span className="product-name">
+                    {item.product?.name || "Unknown Product"}
+                  </span>
+                  <span className="product-quantity">
+                    Qty: {item.quantity}
+                  </span>
+                  <span className="product-price">
+                    ${item.product?.price?.toFixed(2) || "0.00"}
+                  </span>
                 </li>
               ))}
             </ul>
-            <div className="order-total">Total: ${order.total}</div>
+            <div className="order-total">
+              Total: ${parseFloat(order.total).toFixed(2)}
+            </div>
           </li>
         ))}
       </ul>

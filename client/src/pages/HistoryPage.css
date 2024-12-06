@@ -1,86 +1,99 @@
+
 .history-container {
-    max-width: 800px;
-    margin: 50px auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  h2 {
-    text-align: center;
-    color: #333;
-  }
-  
-  .order-list {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .order-item {
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  }
-  
-  .order-header {
-    display: flex;
-    justify-content: space-between;
-    font-weight: bold;
-    color: #555;
-  }
-  
-  .order-products {
-    list-style: none;
-    padding: 10px 0 0;
-    margin: 0;
-  }
-  
-  .product-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 5px 0;
-    color: #666;
-  }
-  
-  .order-total {
-    margin-top: 10px;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .empty-message,
-  .error {
-    text-align: center;
-    color: #666;
-  }
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
 
-  .back-link {
-    position: absolute;
-    top: 20px;   
-    left: 40px;  
-    z-index: 100; 
-    text-align: center; 
-  }
-  
-  .back-image {
-    width: 25px;  
-    height: 25px; 
-  }
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+}
 
-  .contact-support {
-    position: fixed;
-    left: 20px;
-    bottom: 20px;
-  }
-  
-  .contact-support-link {
-    text-decoration: underline;
-    color: #007bff;
-    font-size: 14px;
-  }
-  
+.back-image {
+  width: 30px;
+  height: 30px;
+}
+
+
+.order-list {
+  list-style: none;
+  padding: 0;
+}
+
+.order-item {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: #f9f9f9;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.order-id,
+.order-date,
+.order-status {
+  flex: 1;
+  text-align: left;
+}
+
+
+.order-products {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.product-item:last-child {
+  border-bottom: none;
+}
+
+.product-name {
+  flex: 2;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.product-quantity,
+.product-price {
+  flex: 1;
+  text-align: center;
+}
+
+
+.order-total {
+  margin-top: 10px;
+  text-align: right;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+
+.empty-message {
+  text-align: center;
+  color: #888;
+  font-size: 1.1em;
+}
+
+
+.error {
+  color: red;
+  text-align: center;
+  font-weight: bold;
+}
