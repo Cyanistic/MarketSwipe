@@ -73,6 +73,10 @@ const HistoryPage = () => {
           </li>
         ))}
       </ul>
+
+      <div className="contact-support">
+        <Link to="/support" className="contact-support-link">Contact Support</Link>
+      </div>
     </div>
   );
 };

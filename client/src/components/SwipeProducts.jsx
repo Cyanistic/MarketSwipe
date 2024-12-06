@@ -178,12 +178,16 @@ const SwipeProducts = () => {
         </TinderCard>
 
         <div className="swipe-buttons">
+          <button onClick={handleMoreDetails} className="more-details-button">
+            More Details
+          </button>
           <button onClick={() => swipeManually("left")}>Swipe Left</button>
           <button onClick={() => swipeManually("right")}>Swipe Right</button>
           <button onClick={openQuantityModal} className="add-to-cart-button">
             Add to Cart
           </button>
         </div>
+
 
         {/* Popup Modal for Quantity Input */}
         {quantityModalOpen && (
@@ -198,7 +202,7 @@ const SwipeProducts = () => {
                 className="quantity-input"
               />
 
-              <div className="modal-buttons">
+              <div className="quantity-modal-buttons">
                 <button onClick={handleAddToCart} className="confirm-add-to-cart">
                   Add to Cart
                 </button>
@@ -210,17 +214,13 @@ const SwipeProducts = () => {
           </div>
         )}
 
-        <button onClick={handleMoreDetails} className="modal-close-button">
-          More Details
-        </button>
-
         <div className="center-buttons">
           <Link to="/add-product">
             <button className="centerButton">Create Product</button>
           </Link>
 
           <Link to="/history">
-            <button className="centerButton">History</button>
+            <button className="centerButton">Order History</button>
           </Link>
         </div>
 

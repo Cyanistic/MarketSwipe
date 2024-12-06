@@ -12,8 +12,8 @@ const ProductModal = ({ isOpen, closeModal, product }) => {
       className="modal-container"
     >
       <div>
-        <h2>{product?.name}</h2>
-        <p>{product?.description}</p>
+        <h1>{product?.name}</h1>
+        <h2>Price: ${product?.price}</h2>
         <img
           src={product?.uploads?.[0]?.url || ""}
           alt={product?.name}

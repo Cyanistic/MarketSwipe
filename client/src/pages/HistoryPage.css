@@ -97,3 +97,15 @@
   text-align: center;
   font-weight: bold;
 }
+
+.contact-support {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+}
+
+.contact-support-link {
+  text-decoration: underline;
+  color: #007bff;
+  font-size: 14px;
+}

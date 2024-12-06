@@ -9,7 +9,7 @@ const Cart = () => {
   const [productDetails, setProductDetails] = useState({});
   const navigate = useNavigate();
 
-  // Fetch cart items on component mount
+  // Fetch cart items
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -123,6 +123,10 @@ const Cart = () => {
         <button onClick={handlePayment} className="process-payment-button">
           Process Payment
         </button>
+      </div>
+
+      <div className="contact-support">
+        <Link to="/support" className="contact-support-link">Contact Support</Link>
       </div>
     </div>
   );
