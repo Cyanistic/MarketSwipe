@@ -67,6 +67,19 @@ const Cart = () => {
     }
   };
 
+  const removeAllProducts = async () => {
+    try {
+      // Loop through all items in the cart and remove them individually
+      for (const item of cartItems) {
+        await removeProductFromCart(item.product); // Call removeProductFromCart for each product
+      }
+      setCartItems([]); // Clear the cart in the frontend after all products are removed
+    } catch (error) {
+      console.error("Error removing all products from cart:", error);
+      alert("Failed to remove all products.");
+    }
+  };
+
   const getTotalPrice = () => {
     return cartItems.reduce((total, item) => {
       const product = productDetails[item.product];
@@ -85,11 +98,7 @@ const Cart = () => {
   return (
     <div className="cart-container">
       <Link to="/shopping" className="back-link">
-        <img
-          src="back.png"
-          alt="Back arrow"
-          className="back-image"
-        />
+        <img src="back.png" alt="Back arrow" className="back-image" />
       </Link>
       <h2 className="cart-title">Your Cart</h2>
       {cartItems.length === 0 ? (
@@ -123,10 +132,14 @@ const Cart = () => {
         <button onClick={handlePayment} className="process-payment-button">
           Process Payment
         </button>
+        <button onClick={removeAllProducts} className="remove-all-button">
+          Remove All
+        </button>
       </div>
-
       <div className="contact-support">
-        <Link to="/support" className="contact-support-link">Contact Support</Link>
+        <Link to="/support" className="contact-support-link">
+          Contact Support
+        </Link>
       </div>
     </div>
   );
