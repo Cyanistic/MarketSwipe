@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { BASE_URL } from "../App";
 import useFileAttachment from "../components/FileUploads";
+import "./Add-ProductPage.css";
+import { Link } from "react-router-dom";
+
 
 const AddProduct = () => {
   const [productData, setProductData] = useState({
@@ -144,7 +147,10 @@ const AddProduct = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className="add-product-form">
+      <Link to="/shopping" className="back-link">
+        <img src="back.png" alt="Back arrow" className="back-image" />
+      </Link>
       <div>
         <label>Product Name:</label>
         <input
@@ -209,8 +215,8 @@ const AddProduct = () => {
           placeholder="Tags"
         />
       </div>
-      <div>
-        <label>Upload Product Image:</label>
+      <label>Upload Product Image:</label>
+      <div className="images-buttons">
         <button type="button" onClick={handleFileUploadClick}>
           {loading ? "Uploading..." : "Upload File"}
         </button>
@@ -223,6 +229,7 @@ const AddProduct = () => {
       </div>
       <button type="submit">Create Product</button>
     </form>
+
   );
 };
 

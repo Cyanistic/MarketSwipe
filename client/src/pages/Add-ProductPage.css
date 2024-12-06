@@ -1,0 +1,129 @@
+/* Form container */
+.add-product-form {
+    width: 80%;
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+  
+  /* Form headings and labels */
+.add-product-form div {
+    margin-bottom: 20px;
+}
+  
+.add-product-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+  
+  /* Input fields */
+.add-product-form input[type="text"],
+.add-product-form input[type="number"],
+.add-product-form select {
+    width: 96%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-top: 8px;
+}
+  
+.add-product-form input[type="text"]:focus,
+.add-product-form input[type="number"]:focus,
+.add-product-form select:focus {
+    border-color: #5c9ded;
+    outline: none;
+}
+  
+  /* Buttons */
+  .add-product-form button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #5c9ded;
+    color: white;
+    font-size: 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  .add-product-form button:hover {
+    background-color: #3e79c1;
+  }
+  
+  .add-product-form button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  /* File Upload Section */
+  .add-product-form div p {
+    font-size: 14px;
+    margin-top: 5px;
+    color: #555;
+  }
+  
+  .add-product-form div button {
+    background-color: #4caf50;
+  }
+  
+  .add-product-form div button:hover {
+    background-color: #45a049;
+  }
+  
+  .add-product-form div input[type="file"] {
+    display: none;
+  }
+  
+  /* Error messages */
+  .add-product-form div p[style*="color: red"] {
+    color: red;
+    font-size: 14px;
+  }
+  
+  /* Custom Category Section */
+  .add-product-form div > div {
+    margin-top: 10px;
+  }
+  
+  .add-product-form div > div input[type="text"] {
+    width: 80%;
+    display: inline-block;
+    margin-right: 10px;
+  }
+  
+  .add-product-form div > div button {
+    background-color: #ffa500;
+  }
+  
+  .add-product-form div > div button:hover {
+    background-color: #ff7f00;
+  }
+  
+  /* Submit button alignment */
+  .add-product-form button[type="submit"] {
+    width: 100%;
+    background-color: #4caf50;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 20px;
+  }
+  
+  .add-product-form button[type="submit"]:hover {
+    background-color: #45a049;
+  }
+
+  .images-buttons{
+    
+    display: flex;
+    gap: 10px;
+    flex-direction: column;
+
+  }
+  
