@@ -146,73 +146,74 @@ const SwipeProducts = () => {
     <div className="swipe-products">
       <div className="swipe-container">
         {currentProduct ? (
-          <div>
-            <TinderCard
-              key={currentProduct?.id}
-              onSwipe={handleSwipe}
-              className="swipe-card"
-              preventSwipe={["up", "down"]}
-            >
-              <div>
-                <h3>{currentProduct?.name}</h3>
+          <>
+          <TinderCard
+            key={currentProduct?.id}
+            onSwipe={handleSwipe}
+            className="swipe-card"
+            preventSwipe={["up", "down"]}
+          >
+            <div>
+              <h3>{currentProduct?.name}</h3>
 
-                <div className="product-images">
-                  {images.length > 0 ? (
-                    images.map((image, index) => (
-                      <img
-                        key={index}
-                        src={`${BASE_URL}/api/upload/${image.path}`}
-                        alt={`Product Image ${index + 1}`}
-                        className="product-image"
-                      />
-                    ))
-                  ) : (
-                    <p>No images available</p>
-                  )}
-                </div>
-
-                <p>{currentProduct?.description}</p>
+              <div className="product-images">
+                {images.length > 0 ? (
+                  images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={`${BASE_URL}/api/upload/${image.path}`}
+                      alt={`Product Image ${index + 1}`}
+                      className="product-image"
+                    />
+                  ))
+                ) : (
+                  <p>No images available</p>
+                )}
               </div>
-            </TinderCard>
 
-            <div className="swipe-buttons">
-              <button onClick={handleMoreDetails} className="more-details-button">
-                More Details
-              </button>
-              <button onClick={() => swipeManually("left")}>Swipe Left</button>
-              <button onClick={() => swipeManually("right")}>Swipe Right</button>
-              <button onClick={openQuantityModal} className="add-to-cart-button">
-                Add to Cart
-              </button>
+              <p>{currentProduct?.description}</p>
             </div>
+          </TinderCard>
+
+          <div className="swipe-buttons">
+            <button onClick={handleMoreDetails} className="more-details-button">
+              More Details
+            </button>
+            <button onClick={() => swipeManually("left")}>Swipe Left</button>
+            <button onClick={() => swipeManually("right")}>Swipe Right</button>
+            <button onClick={openQuantityModal} className="add-to-cart-button">
+              Add to Cart
+            </button>
+          </div>
 
 
-            {/* Popup Modal for Quantity Input */}
-            {quantityModalOpen && (
-              <div className="quantity-modal-overlay">
-                <div className="quantity-modal">
-                  <h3>Select Quantity</h3>
-                  <input
-                    type="number"
-                    value={quantity}
-                    onChange={handleQuantityChange}
-                    min="1"
-                    className="quantity-input"
-                  />
+          {/* Popup Modal for Quantity Input */}
+          {quantityModalOpen && (
+            <div className="quantity-modal-overlay">
+              <div className="quantity-modal">
+                <h3>Select Quantity</h3>
+                <input
+                  type="number"
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  min="1"
+                  className="quantity-input"
+                />
 
-                  <div className="quantity-modal-buttons">
-                    <button onClick={handleAddToCart} className="confirm-add-to-cart">
-                      Add to Cart
-                    </button>
-                    <button onClick={closeQuantityModal} className="cancel-modal">
-                      Cancel
-                    </button>
-                  </div>
+                <div className="quantity-modal-buttons">
+                  <button onClick={handleAddToCart} className="confirm-add-to-cart">
+                    Add to Cart
+                  </button>
+                  <button onClick={closeQuantityModal} className="cancel-modal">
+                    Cancel
+                  </button>
                 </div>
               </div>
-            )}
-          </div>
-        ) : (<p className="swipe-container">Loading products...</p>)}
+            </div>
+          )}
+          </>
+        ) : (<p>Loading products...</p>)}
+
         <div className="center-buttons">
           <Link to="/add-product">
             <button className="centerButton">Create Product</button>
