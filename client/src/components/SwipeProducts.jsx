@@ -51,13 +51,16 @@ const SwipeProducts = () => {
         .then((response) => {
           const nextProduct = response.data; // Get the next product from the response
 
-          if (!nextProduct) {
-            // If no more products are returned, reset swipe history
+          // Check if the response indicates no more products
+          if (nextProduct?.message === 'No more products to recommend based on your preferences') {
+            console.log("No more products, resetting swipe history...");
+            resetSwipeHistory();
+          } else if (!nextProduct) {
+            // If no product is returned, reset swipe history
             resetSwipeHistory();
           } else {
             // Set the next product as the current product
             setCurrentProduct(nextProduct);
-            console.log(nextProduct)
             if (nextProduct?.uploads?.length) {
               fetchProductImages(nextProduct.uploads);
             } else {
@@ -142,6 +145,7 @@ const SwipeProducts = () => {
   const handleMoreDetails = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
+  console.log(currentProduct)
   return (
     <div className="swipe-products">
       <div className="swipe-container">
