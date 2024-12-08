@@ -19,6 +19,7 @@ const SwipeProducts = () => {
       try {
         const response = await axios.get(`${BASE_URL}/api/products`);
         setCurrentProduct(response.data[0]); // Set the first product
+        fetchProductImages(response.data[0].uploads);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -96,6 +97,7 @@ const SwipeProducts = () => {
       // After resetting, try to fetch the first product again
       const response = await axios.get(`${BASE_URL}/api/products`);
       setCurrentProduct(response.data[0]); // Reset the product list by fetching the first product
+      fetchProductImages(response.data[0].uploads);
     } catch (error) {
       console.error("Error resetting swipe history:", error);
       alert("Failed to reset swipe history.");
