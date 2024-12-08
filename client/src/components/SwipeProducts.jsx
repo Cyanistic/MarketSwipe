@@ -54,6 +54,7 @@ const SwipeProducts = () => {
           // Check if the response indicates no more products
           if (nextProduct?.message === 'No more products to recommend based on your preferences') {
             console.log("No more products, resetting swipe history...");
+            setImages([]);
             resetSwipeHistory();
           } else if (!nextProduct) {
             // If no product is returned, reset swipe history
@@ -232,6 +233,7 @@ const SwipeProducts = () => {
           isOpen={isModalOpen}
           closeModal={closeModal}
           product={currentProduct}
+          images={images}
         />
       </div>
     </div>
