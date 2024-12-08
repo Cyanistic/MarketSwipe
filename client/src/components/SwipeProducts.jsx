@@ -51,10 +51,10 @@ const SwipeProducts = () => {
         .then((response) => {
           const nextProduct = response.data; // Get the next product from the response
 
+          setImages([]);
           // Check if the response indicates no more products
           if (nextProduct?.message === 'No more products to recommend based on your preferences') {
             console.log("No more products, resetting swipe history...");
-            setImages([]);
             resetSwipeHistory();
           } else if (!nextProduct) {
             // If no product is returned, reset swipe history
@@ -167,7 +167,7 @@ const SwipeProducts = () => {
                     <img
                       key={index}
                       src={`${BASE_URL}/api/upload/${image.path}`}
-                      alt={`Product Image ${index + 1}`}
+                      alt={`${currentProduct.name} Image`}
                       className="product-image"
                     />
                   ))

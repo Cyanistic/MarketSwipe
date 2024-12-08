@@ -4,7 +4,7 @@ import { BASE_URL } from "../App";
 import useFileAttachment from "../components/FileUploads";
 import "./Add-ProductPage.css";
 import { Link } from "react-router-dom";
-
+import {useNavigate} from "react-router-dom";
 
 const AddProduct = () => {
   const [productData, setProductData] = useState({
@@ -14,6 +14,7 @@ const AddProduct = () => {
     tags: "",
     uploadIds:[],
   });
+  const navigate = useNavigate();
   const [categories, setCategories] = useState([]); // List of categories from the backend
   const [customCategory, setCustomCategory] = useState({
     name: "",
@@ -141,8 +142,11 @@ const AddProduct = () => {
         }
       );
       console.log("Product created successfully:", response.data);
+      alert(response.data.message);
+      navigate("/shopping");
     } catch (error) {
       console.error("Error creating product:", error.response?.data || error.message);
+      alert(error.response?.data?.message || "Failed to create product");
     }
   };
 
